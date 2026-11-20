@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { getSupabaseAdminClient } from './supabase';
 import { Product, Category, Order, Banner, StoreSetting, PageContent, DeliveryZone, ContactMessage } from './types';
 
 // Local persistence file path
@@ -199,6 +200,70 @@ function saveData(data: InitialData) {
   }
 }
 
+
+let cachedStoreData: InitialData | null = null;
+let lastCloudFetchTime = 0;
+
+async function loadDataAsync(): Promise<InitialData> {
+  const now = Date.now();
+  if (cachedStoreData && (now - lastCloudFetchTime < 2000)) {
+    return cachedStoreData;
+  }
+
+  const supabase = getSupabaseAdminClient();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('store_settings')
+        .select('setting_value')
+        .eq('setting_key', 'dregital_store_dataset')
+        .maybeSingle();
+
+      if (!error && data?.setting_value && typeof data.setting_value === 'object') {
+        const cloudData = data.setting_value;
+        cachedStoreData = {
+          categories: Array.isArray(cloudData.categories) && cloudData.categories.length > 0 ? cloudData.categories : defaultDataset.categories,
+          products: Array.isArray(cloudData.products) ? cloudData.products : [],
+          banners: Array.isArray(cloudData.banners) && cloudData.banners.length > 0 ? cloudData.banners : defaultDataset.banners,
+          deliveryZones: Array.isArray(cloudData.deliveryZones) ? cloudData.deliveryZones : defaultDataset.deliveryZones,
+          orders: Array.isArray(cloudData.orders) ? cloudData.orders : [],
+          pages: Array.isArray(cloudData.pages) && cloudData.pages.length > 0 ? cloudData.pages : defaultDataset.pages,
+          settings: { ...defaultDataset.settings, ...(cloudData.settings || {}) },
+          contactMessages: Array.isArray(cloudData.contactMessages) ? cloudData.contactMessages : [],
+        };
+        lastCloudFetchTime = now;
+        return cachedStoreData;
+      }
+    } catch (e) {
+      console.error('Error loading store dataset from Supabase:', e);
+    }
+  }
+
+  const local = loadData();
+  cachedStoreData = local;
+  lastCloudFetchTime = now;
+  return local;
+}
+
+async function saveDataAsync(data: InitialData): Promise<void> {
+  cachedStoreData = data;
+  lastCloudFetchTime = Date.now();
+  saveData(data);
+
+  const supabase = getSupabaseAdminClient();
+  if (supabase) {
+    try {
+      await supabase.from('store_settings').upsert({
+        setting_key: 'dregital_store_dataset',
+        setting_value: data,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'setting_key' });
+    } catch (e) {
+      console.error('Failed to sync store dataset to Supabase:', e);
+    }
+  }
+}
+
 export const db = {
   // PRODUCTS
   async getProducts(options: {
@@ -213,7 +278,7 @@ export const db = {
     offset?: number;
     includeInactive?: boolean;
   } = {}): Promise<{ products: Product[]; total: number }> {
-    const store = loadData();
+    const store = await loadDataAsync();
     let list = [...store.products];
 
     // Filter inactive products unless requested (e.g., in admin dashboard)
@@ -266,7 +331,7 @@ export const db = {
   },
 
   async getProductBySlug(slugOrId: string): Promise<Product | null> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const found = store.products.find(p => p.slug === slugOrId || p.id === slugOrId);
     if (!found) return null;
     const category = store.categories.find(c => c.id === found.category_id) || null;
@@ -274,7 +339,7 @@ export const db = {
   },
 
   async createProduct(productData: Partial<Product>): Promise<Product> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const id = `prod-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const baseSlug = (productData.name || 'product')
       .toLowerCase()
@@ -322,12 +387,12 @@ export const db = {
     };
 
     store.products.unshift(newProd);
-    saveData(store);
+    await saveDataAsync(store);
     return newProd;
   },
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const index = store.products.findIndex(p => p.id === id);
     if (index === -1) return null;
 
@@ -351,21 +416,21 @@ export const db = {
     };
 
     store.products[index] = updated;
-    saveData(store);
+    await saveDataAsync(store);
     return updated;
   },
 
   async deleteProduct(id: string): Promise<boolean> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const initialLen = store.products.length;
     store.products = store.products.filter(p => p.id !== id);
-    saveData(store);
+    await saveDataAsync(store);
     return store.products.length < initialLen;
   },
 
   // CATEGORIES
   async getCategories(includeInactive = false): Promise<Category[]> {
-    const store = loadData();
+    const store = await loadDataAsync();
     let list = [...store.categories];
     if (!includeInactive) {
       list = list.filter(c => c.is_active !== false);
@@ -388,7 +453,7 @@ export const db = {
   },
 
   async createCategory(cat: Partial<Category>): Promise<Category> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const id = `cat-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const baseSlug = (cat.name || 'category')
       .toLowerCase()
@@ -413,12 +478,12 @@ export const db = {
     };
 
     store.categories.push(newCat);
-    saveData(store);
+    await saveDataAsync(store);
     return newCat;
   },
 
   async updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const index = store.categories.findIndex(c => c.id === id);
     if (index === -1) return null;
 
@@ -432,12 +497,12 @@ export const db = {
     };
 
     store.categories[index] = updated;
-    saveData(store);
+    await saveDataAsync(store);
     return updated;
   },
 
   async deleteCategory(id: string, reassignTo: string | null = null): Promise<boolean> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const catToDelete = store.categories.find(c => c.id === id);
     if (!catToDelete) return false;
 
@@ -458,33 +523,60 @@ export const db = {
     });
 
     store.categories = store.categories.filter(c => c.id !== id);
-    saveData(store);
+    await saveDataAsync(store);
     return true;
   },
 
   // BANNERS
   async getBanners(includeInactive: boolean = false): Promise<Banner[]> {
-    const store = loadData();
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      try {
+        let query = supabase.from('banners').select('*').order('display_order', { ascending: true });
+        if (!includeInactive) {
+          query = query.eq('is_active', true);
+        }
+        const { data, error } = await query;
+        if (!error && Array.isArray(data) && data.length > 0) {
+          return data;
+        }
+      } catch (err) {
+        console.error('Error fetching banners from Supabase:', err);
+      }
+    }
+    const store = await loadDataAsync();
     const list = store.banners || defaultDataset.banners;
     return includeInactive ? list : list.filter(b => b.is_active !== false);
   },
 
   async updateBanners(banners: Banner[]): Promise<Banner[]> {
-    const store = loadData();
+    const supabase = getSupabaseAdminClient();
+    if (supabase) {
+      try {
+        await supabase.from('banners').delete().neq('id', 'dummy_id_to_match_all');
+        if (banners.length > 0) {
+          const { error } = await supabase.from('banners').insert(banners);
+          if (error) console.error('Error inserting banners into Supabase:', error);
+        }
+      } catch (err) {
+        console.error('Error updating banners in Supabase:', err);
+      }
+    }
+    const store = await loadDataAsync();
     store.banners = banners;
-    saveData(store);
+    await saveDataAsync(store);
     return store.banners;
   },
 
   // DELIVERY ZONES
   async getDeliveryZones(): Promise<DeliveryZone[]> {
-    const store = loadData();
+    const store = await loadDataAsync();
     return store.deliveryZones || defaultDataset.deliveryZones;
   },
 
   // ORDERS
   async getOrders(options: { search?: string; status?: string } = {}): Promise<Order[]> {
-    const store = loadData();
+    const store = await loadDataAsync();
     let list = store.orders || [];
     if (options.status) {
       list = list.filter(o => o.order_status.toLowerCase() === options.status?.toLowerCase());
@@ -501,17 +593,17 @@ export const db = {
   },
 
   async getOrderById(id: string): Promise<Order | null> {
-    const store = loadData();
+    const store = await loadDataAsync();
     return store.orders.find(o => o.id === id || o.order_number === id) || null;
   },
 
   async getOrderByIdOrNumber(idOrNumber: string): Promise<Order | null> {
-    const store = loadData();
+    const store = await loadDataAsync();
     return store.orders.find(o => o.id === idOrNumber || o.order_number === idOrNumber) || null;
   },
 
   async trackOrder(orderNumber: string, phone: string): Promise<Order | null> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const cleanPhone = phone.trim().replace(/\D/g, '').slice(-10);
     return store.orders.find(o => 
       o.order_number.toLowerCase() === orderNumber.toLowerCase().trim() &&
@@ -520,7 +612,7 @@ export const db = {
   },
 
   async createOrder(orderData: Partial<Order>): Promise<Order> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const id = `ord-${Date.now()}`;
     const count = store.orders.length + 1001;
     const orderNumber = `DRG-${new Date().getFullYear()}-${count}`;
@@ -561,12 +653,12 @@ export const db = {
     }
 
     store.orders.unshift(newOrder);
-    saveData(store);
+    await saveDataAsync(store);
     return newOrder;
   },
 
   async updateOrderStatus(id: string, order_status: any, payment_status_or_tracking?: any): Promise<Order | null> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const index = store.orders.findIndex(o => o.id === id || o.order_number === id);
     if (index === -1) return null;
 
@@ -580,13 +672,13 @@ export const db = {
     }
     store.orders[index].updated_at = new Date().toISOString();
 
-    saveData(store);
+    await saveDataAsync(store);
     return store.orders[index];
   },
 
   // PAGES
   async getPage(slug: string): Promise<PageContent | null> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const found = (store.pages || defaultDataset.pages).find(p => p.slug === slug);
     if (found) return found;
     return defaultDataset.pages.find(p => p.slug === slug) || null;
@@ -594,12 +686,12 @@ export const db = {
 
   // CONTACT MESSAGES
   async getContactMessages(): Promise<ContactMessage[]> {
-    const store = loadData();
+    const store = await loadDataAsync();
     return store.contactMessages || [];
   },
 
   async saveContactMessage(msg: Partial<ContactMessage>): Promise<ContactMessage> {
-    const store = loadData();
+    const store = await loadDataAsync();
     const newMsg: ContactMessage = {
       id: `msg-${Date.now()}`,
       name: msg.name || 'Anonymous',
@@ -611,24 +703,24 @@ export const db = {
       created_at: new Date().toISOString()
     };
     store.contactMessages.unshift(newMsg);
-    saveData(store);
+    await saveDataAsync(store);
     return newMsg;
   },
 
   // SETTINGS
   async getSettings(): Promise<Record<string, any>> {
-    const store = loadData();
+    const store = await loadDataAsync();
     return store.settings || defaultDataset.settings;
   },
 
   async updateSettings(keyOrObj: any, value?: any): Promise<Record<string, any>> {
-    const store = loadData();
+    const store = await loadDataAsync();
     if (typeof keyOrObj === 'string') {
       store.settings[keyOrObj] = value;
     } else if (typeof keyOrObj === 'object') {
       store.settings = { ...store.settings, ...keyOrObj };
     }
-    saveData(store);
+    await saveDataAsync(store);
     return store.settings;
   }
 };
