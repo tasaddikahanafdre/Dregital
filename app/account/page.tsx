@@ -23,13 +23,6 @@ export default function AccountPage() {
             <p className="text-xs text-neutral-400 mt-0.5">Welcome to your Dregital shopping dashboard</p>
           </div>
         </div>
-
-        <Link
-          href="/admin"
-          className="text-xs text-neutral-400 hover:text-white border border-neutral-700 px-3 py-1.5 rounded-lg"
-        >
-          Staff & Admin Login →
-        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

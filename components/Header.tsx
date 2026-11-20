@@ -55,16 +55,8 @@ export default function Header() {
       {/* 1. Header Area: White background, Large Centered Logo, Right Icons */}
       <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex items-center justify-between">
         
-        {/* Left balance element / subtle admin portal */}
-        <div className="w-20 sm:w-28 flex items-center justify-start">
-          <Link
-            href="/admin"
-            className="text-[10px] uppercase tracking-widest text-neutral-300 hover:text-black transition-colors"
-            title="Admin Portal"
-          >
-            ADMIN
-          </Link>
-        </div>
+        {/* Left balance spacer */}
+        <div className="w-20 sm:w-28 flex items-center justify-start" />
 
         {/* Centered Large Logo (Displays logo.png if present, otherwise fallback text "DREGITAL") */}
         <div className="absolute left-1/2 -translate-x-1/2 text-center flex items-center justify-center">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
@@ -9,13 +9,13 @@ import {
   FolderTree, 
   ShoppingBag, 
   Layers, 
-  Upload, 
   Settings, 
   LogOut, 
   ExternalLink,
   ShieldCheck,
   Menu,
   X,
+  Lock,
   Image as ImageIcon
 } from 'lucide-react';
 
@@ -23,26 +23,60 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+// Configurable inactivity timeout (15 minutes)
+const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [isLocking, setIsLocking] = useState(false);
+  const lastActivityRef = useRef<number>(Date.now());
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    // Check local session
-    const auth = localStorage.getItem('dregital_admin_auth');
-    if (!auth && pathname !== '/admin/login') {
-      router.push('/admin/login');
-    } else {
-      setIsAdminLoggedIn(true);
+  // Handle Lock / Logout
+  const handleLockDashboard = useCallback(async (reason?: 'timeout') => {
+    if (isLocking) return;
+    setIsLocking(true);
+
+    try {
+      await fetch('/api/admin/auth', { method: 'DELETE' });
+    } catch {
+      // ignore
+    } finally {
+      if (reason === 'timeout') {
+        window.location.href = `/admin/login?reason=timeout&from=${encodeURIComponent(pathname)}`;
+      } else {
+        window.location.href = '/admin/login';
+      }
     }
-  }, [pathname, router]);
+  }, [isLocking, pathname]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('dregital_admin_auth');
-    router.push('/admin/login');
-  };
+  // Activity detection & Inactivity timer
+  useEffect(() => {
+    if (pathname === '/admin/login') return;
+
+    const resetTimer = () => {
+      lastActivityRef.current = Date.now();
+    };
+
+    const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+    events.forEach((ev) => window.addEventListener(ev, resetTimer, { passive: true }));
+
+    // Periodic check every 15 seconds
+    timerRef.current = setInterval(() => {
+      const idleTime = Date.now() - lastActivityRef.current;
+      if (idleTime >= INACTIVITY_TIMEOUT_MS) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        handleLockDashboard('timeout');
+      }
+    }, 15000);
+
+    return () => {
+      events.forEach((ev) => window.removeEventListener(ev, resetTimer));
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [pathname, handleLockDashboard]);
 
   if (pathname === '/admin/login') {
     return <>{children}</>;
@@ -66,12 +100,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <Link href="/admin" className="text-base font-black tracking-tight text-white uppercase">
           DREGITAL <span className="text-neutral-500 text-xs">ADMIN</span>
         </Link>
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-1.5 text-neutral-400 hover:text-white"
-        >
-          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleLockDashboard()}
+            className="p-1.5 text-neutral-400 hover:text-red-400 rounded-lg hover:bg-neutral-800 transition-colors"
+            title="Lock Dashboard"
+            aria-label="Lock Dashboard"
+          >
+            <Lock className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-1.5 text-neutral-400 hover:text-white"
+            aria-label="Toggle menu"
+          >
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Sidebar */}
@@ -127,11 +172,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </Link>
 
           <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3.5 py-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 rounded-lg transition-colors text-left"
+            onClick={() => handleLockDashboard()}
+            className="w-full flex items-center gap-3 px-3.5 py-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 rounded-lg transition-colors text-left cursor-pointer"
           >
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out</span>
+            <Lock className="w-4 h-4" />
+            <span>Lock Dashboard</span>
           </button>
         </div>
       </aside>

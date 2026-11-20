@@ -156,13 +156,6 @@ export default function MobileNav({ isOpen, onClose, categories }: MobileNavProp
             <Phone className="w-4 h-4 text-neutral-500" />
             <span>Customer Support (09612-000000)</span>
           </Link>
-          <Link
-            href="/admin"
-            onClick={onClose}
-            className="flex items-center gap-2 py-1.5 text-neutral-500 hover:text-neutral-900 text-[11px]"
-          >
-            <span>Admin Portal</span>
-          </Link>
         </div>
       </div>
     </div>
