@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#F4F4F5"/>
+  <!-- Minimalist Package / Special Collections Box -->
+  <rect x="12" y="17" width="24" height="19" rx="2" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="24" y1="17" x2="24" y2="36" stroke="#111111" stroke-width="2" stroke-linecap="round"/>
+  <line x1="12" y1="24" x2="36" y2="24" stroke="#111111" stroke-width="2" stroke-linecap="round"/>
+  <!-- Bow knot -->
+  <path d="M24 17C22.5 13.5 18 13.5 18 15.5C18 17.5 21 17 24 17Z" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 17C25.5 13.5 30 13.5 30 15.5C30 17.5 27 17 24 17Z" stroke="#111111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

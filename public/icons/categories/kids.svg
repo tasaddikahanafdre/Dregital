@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#F4F4F5"/>
+  <!-- Minimalist Nordic Bear / Kids -->
+  <!-- Left Ear -->
+  <circle cx="16.5" cy="16.5" r="3.5" stroke="#111111" stroke-width="2"/>
+  <!-- Right Ear -->
+  <circle cx="31.5" cy="16.5" r="3.5" stroke="#111111" stroke-width="2"/>
+  <!-- Head -->
+  <circle cx="24" cy="25" r="10" stroke="#111111" stroke-width="2" fill="#F4F4F5"/>
+  <!-- Eyes -->
+  <circle cx="20.5" cy="24" r="1.2" fill="#111111"/>
+  <circle cx="27.5" cy="24" r="1.2" fill="#111111"/>
+  <!-- Nose/Smile -->
+  <circle cx="24" cy="27" r="1" fill="#111111"/>
+  <path d="M22 28.5C23 29.5 25 29.5 26 28.5" stroke="#111111" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
