@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#F4F4F5"/>
+  <!-- Minimalist Footwear, Shoes & Sneakers -->
+  <path d="M10 28C10 24 13 22 17 22H21L25 17H31V25L38 27V32H10V28Z" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Sneaker Sole Cushion -->
+  <line x1="10" y1="32" x2="38" y2="32" stroke="#111111" stroke-width="2" stroke-linecap="round"/>
+  <!-- Laces -->
+  <line x1="22" y1="20" x2="25" y2="23" stroke="#111111" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="25" y1="18" x2="28" y2="21" stroke="#111111" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

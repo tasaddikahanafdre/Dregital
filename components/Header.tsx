@@ -14,6 +14,15 @@ export default function Header() {
   const [hasCustomLogo, setHasCustomLogo] = useState<boolean>(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  const [navCategories, setNavCategories] = useState<Array<{ name: string; href: string }>>([
+    { name: 'Tech', href: '/category/tech' },
+    { name: 'Food', href: '/category/food' },
+    { name: 'Clothing', href: '/category/clothing' },
+    { name: 'Kids', href: '/category/kids' },
+    { name: 'Home', href: '/category/home' },
+    { name: 'Other', href: '/category/other' },
+  ]);
+
   useEffect(() => {
     // Check if custom logo exists in /public/logo/logo.png
     fetch('/api/logo', { method: 'HEAD', cache: 'no-store' })
@@ -25,6 +34,16 @@ export default function Header() {
       .catch(() => {
         setHasCustomLogo(false);
       });
+
+    // Dynamically load all active categories
+    fetch('/api/categories')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setNavCategories(data.map((c: any) => ({ name: c.name, href: `/category/${c.slug}` })));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -40,15 +59,6 @@ export default function Header() {
       router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
-
-  const navCategories = [
-    { name: 'Tech', href: '/category/tech' },
-    { name: 'Food', href: '/category/food' },
-    { name: 'Clothing', href: '/category/clothing' },
-    { name: 'Kids', href: '/category/kids' },
-    { name: 'Home', href: '/category/home' },
-    { name: 'Other', href: '/category/other' },
-  ];
 
   return (
     <header className="w-full bg-white sticky top-0 z-40">

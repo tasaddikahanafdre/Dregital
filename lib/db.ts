@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { getSupabaseAdminClient } from './supabase';
 import { Product, Category, Order, Banner, StoreSetting, PageContent, DeliveryZone, ContactMessage } from './types';
+import { getCategoryIconUrl, matchCategoryIcon } from './categoryIcons';
 
 // Local persistence file path
 const DATA_FILE = path.join(process.cwd(), 'data', 'store_data.json');
@@ -437,6 +438,11 @@ export const db = {
     if (!includeInactive) {
       list = list.filter(c => c.is_active !== false);
     }
+    // Automatically ensure every category has a matching professional SVG icon
+    list = list.map(c => ({
+      ...c,
+      image_url: getCategoryIconUrl(c)
+    }));
     return list.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
   },
 
@@ -464,15 +470,21 @@ export const db = {
       .replace(/[\s_-]+/g, '-')
       .replace(/^-+|-+$/g, '');
 
+    // Match appropriate category icon automatically based on name and meaning
+    const matched = matchCategoryIcon(`${cat.name || ''} ${cat.slug || ''}`);
+    const resolvedIconUrl = cat.image_url && cat.image_url.startsWith('/icons/categories/')
+      ? cat.image_url
+      : matched.iconUrl;
+
     const newCat: Category = {
       id,
       name: cat.name?.trim() || 'New Category',
       slug: cat.slug?.trim() || baseSlug,
       parent_id: cat.parent_id || null,
       description: cat.description?.trim() || '',
-      image_url: cat.image_url || null,
+      image_url: resolvedIconUrl,
       banner_url: cat.banner_url || null,
-      icon_name: cat.icon_name || 'Tag',
+      icon_name: cat.icon_name && cat.icon_name !== 'Tag' ? cat.icon_name : matched.iconName,
       display_order: cat.display_order !== undefined ? Number(cat.display_order) : store.categories.length + 1,
       is_active: cat.is_active !== undefined ? Boolean(cat.is_active) : true,
       is_featured: Boolean(cat.is_featured),
@@ -489,11 +501,21 @@ export const db = {
     const index = store.categories.findIndex(c => c.id === id);
     if (index === -1) return null;
 
+    let finalImageUrl = updates.image_url !== undefined ? updates.image_url : store.categories[index].image_url;
+    if (!finalImageUrl || !finalImageUrl.startsWith('/icons/categories/')) {
+      finalImageUrl = getCategoryIconUrl({
+        name: updates.name || store.categories[index].name,
+        slug: updates.slug || store.categories[index].slug,
+        image_url: finalImageUrl
+      });
+    }
+
     const updated: Category = {
       ...store.categories[index],
       ...updates,
       name: updates.name !== undefined ? updates.name.trim() : store.categories[index].name,
       slug: updates.slug !== undefined ? updates.slug.trim() : store.categories[index].slug,
+      image_url: finalImageUrl,
       display_order: updates.display_order !== undefined ? Number(updates.display_order) : store.categories[index].display_order,
       is_active: updates.is_active !== undefined ? Boolean(updates.is_active) : store.categories[index].is_active,
     };

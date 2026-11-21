@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { db } from '@/lib/db';
+import { getCategoryIconUrl } from '@/lib/categoryIcons';
 
 export const revalidate = 0;
 
@@ -51,9 +52,16 @@ export default async function CategoriesPage() {
                 <div className="w-full aspect-square bg-neutral-100 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-200 shadow-xs group-hover:border-black transition-colors">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={category.image_url || '/icons/categories/tech.svg'}
+                    src={getCategoryIconUrl(category)}
                     alt={category.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.dataset.fallback) {
+                        target.dataset.fallback = 'true';
+                        target.src = '/icons/categories/other.svg';
+                      }
+                    }}
                   />
                 </div>
 

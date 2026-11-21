@@ -4,6 +4,7 @@ import React, { useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Category } from '@/lib/types';
+import { getCategoryIconUrl } from '@/lib/categoryIcons';
 
 interface CategorySliderProps {
   categories: Category[];
@@ -104,26 +105,20 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
             href={`/category/${cat.slug}`}
             className="group flex flex-col items-center shrink-0 text-center transition-transform hover:scale-105 duration-200"
           >
-            <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-neutral-100 overflow-hidden relative border-2 border-neutral-900 shadow-xs">
-              {cat.image_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={cat.image_url}
-                  alt={cat.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.dataset.fallback) {
-                      target.dataset.fallback = 'true';
-                      target.src = '/icons/categories/tech.svg';
-                    }
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full bg-black flex items-center justify-center text-white text-xs font-bold uppercase">
-                  {cat.name.slice(0, 2)}
-                </div>
-              )}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-neutral-100 overflow-hidden relative border-2 border-neutral-900 shadow-xs flex items-center justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={getCategoryIconUrl(cat)}
+                alt={cat.name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.dataset.fallback) {
+                    target.dataset.fallback = 'true';
+                    target.src = '/icons/categories/other.svg';
+                  }
+                }}
+              />
             </div>
             <span className="text-xs sm:text-sm font-bold text-black uppercase tracking-wider mt-3 group-hover:underline">
               {cat.name}

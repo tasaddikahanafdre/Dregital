@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#F4F4F5"/>
+  <!-- Minimalist Men's Fashion / Tailored Blazer -->
+  <!-- Outer Shoulders and Body -->
+  <path d="M12 36V18L19 13H29L36 18V36H12Z" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Notch Lapels V-Line -->
+  <path d="M19 13L24 26L29 13" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Center Jacket Opening -->
+  <line x1="24" y1="26" x2="24" y2="36" stroke="#111111" stroke-width="2" stroke-linecap="round"/>
+  <!-- Tie Knot & Blade -->
+  <path d="M22.5 16H25.5L25 19H23L22.5 16Z" fill="#111111"/>
+  <path d="M23 19L24 25L25 19H23Z" fill="#111111"/>
+  <!-- Lapel Left/Right Slits -->
+  <line x1="16" y1="19" x2="20" y2="21" stroke="#111111" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="32" y1="19" x2="28" y2="21" stroke="#111111" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

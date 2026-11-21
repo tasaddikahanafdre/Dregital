@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 48 48" fill="none">
+  <rect width="48" height="48" rx="12" fill="#F4F4F5"/>
+  <!-- Minimalist Men's & Fashion Accessories (Aviator Sunglasses & Card Wallet) -->
+  <!-- Top Bridge -->
+  <path d="M12 21H36" stroke="#111111" stroke-width="2" stroke-linecap="round"/>
+  <!-- Nose Bridge Curve -->
+  <path d="M21.5 24C22.5 22.8 25.5 22.8 26.5 24" stroke="#111111" stroke-width="2" stroke-linecap="round"/>
+  <!-- Left Lens -->
+  <path d="M12 21C12 27.5 15.5 30 20.5 30C22 30 22.5 28.5 22.5 25V21H12Z" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right Lens -->
+  <path d="M36 21C36 27.5 32.5 30 27.5 30C26 30 25.5 28.5 25.5 25V21H36Z" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Temples -->
+  <line x1="12" y1="21" x2="9" y2="17" stroke="#111111" stroke-width="2" stroke-linecap="round"/>
+  <line x1="36" y1="21" x2="39" y2="17" stroke="#111111" stroke-width="2" stroke-linecap="round"/>
+</svg>

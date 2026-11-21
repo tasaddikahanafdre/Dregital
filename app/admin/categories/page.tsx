@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Category } from '@/lib/types';
 import { slugify } from '@/lib/utils';
+import { getCategoryIconUrl, matchCategoryIcon } from '@/lib/categoryIcons';
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -84,14 +85,15 @@ export default function AdminCategoriesPage() {
 
   const openAddModal = (parentId: string | null = null) => {
     setEditingCategory(null);
+    const initialMatched = matchCategoryIcon('');
     setFormData({
       name: '',
       slug: '',
       parent_id: parentId || '',
       description: '',
-      image_url: '',
+      image_url: initialMatched.iconUrl,
       banner_url: '',
-      icon_name: 'Tag',
+      icon_name: initialMatched.iconName,
       display_order: categories.length + 1,
       is_active: true,
       is_featured: false
@@ -106,7 +108,7 @@ export default function AdminCategoriesPage() {
       slug: cat.slug,
       parent_id: cat.parent_id || '',
       description: cat.description || '',
-      image_url: cat.image_url || '',
+      image_url: getCategoryIconUrl(cat),
       banner_url: cat.banner_url || '',
       icon_name: cat.icon_name || 'Tag',
       display_order: cat.display_order,
@@ -210,8 +212,16 @@ export default function AdminCategoriesPage() {
                 {/* Parent Row */}
                 <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-neutral-950/40 border-b border-neutral-800/80">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-neutral-800 text-white flex items-center justify-center font-bold">
-                      <Folder className="w-4 h-4 text-neutral-300" />
+                    <div className="w-10 h-10 rounded-full border border-neutral-700 bg-neutral-800 overflow-hidden flex items-center justify-center shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={getCategoryIconUrl(parent)}
+                        alt={parent.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = '/icons/categories/other.svg';
+                        }}
+                      />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -316,11 +326,19 @@ export default function AdminCategoriesPage() {
                     type="text"
                     required
                     value={formData.name}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      name: e.target.value,
-                      slug: formData.slug || slugify(e.target.value)
-                    })}
+                    onChange={(e) => {
+                      const newName = e.target.value;
+                      const matched = matchCategoryIcon(newName);
+                      const shouldAutoUpdateIcon = !formData.image_url || formData.image_url.startsWith('/icons/categories/');
+                      setFormData({ 
+                        ...formData, 
+                        name: newName,
+                        slug: !editingCategory ? slugify(newName) : formData.slug,
+                        image_url: shouldAutoUpdateIcon ? matched.iconUrl : formData.image_url,
+                        icon_name: shouldAutoUpdateIcon ? matched.iconName : formData.icon_name
+                      });
+                    }}
+                    placeholder="e.g. Watches, Beauty, Electronics..."
                     className="w-full p-2.5 bg-neutral-950 border border-neutral-700 rounded-lg text-white"
                   />
                 </div>
@@ -359,61 +377,115 @@ export default function AdminCategoriesPage() {
                   />
                 </div>
 
-                {/* 1:1 Category Image Upload from PC */}
+                {/* Category Icon & Appearance */}
                 <div className="space-y-3 pt-1">
                   <div className="flex items-center justify-between">
                     <label className="block text-neutral-300 font-semibold">
-                      Category Image (1:1 Ratio) *
+                      Category Icon & Appearance
                     </label>
-                    <span className="text-[10px] text-neutral-400 font-mono">
-                      Supabase: image/categories/
+                    <span className="text-[10px] text-emerald-400 font-medium">
+                      Auto-Matched & Consistent
                     </span>
                   </div>
 
-                  {/* 1:1 Preview if image exists */}
-                  {formData.image_url ? (
-                    <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        {/* Circular 1:1 Homepage preview */}
-                        <div className="flex flex-col items-center gap-1">
-                          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/40 bg-black flex-shrink-0">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={formData.image_url}
-                              alt="Category 1:1 circular"
-                              className="w-full h-full object-cover"
-                            />
+                  {/* 1:1 Live Icon Preview */}
+                  {(() => {
+                    const activeIconUrl = getCategoryIconUrl({ 
+                      name: formData.name, 
+                      slug: formData.slug, 
+                      image_url: formData.image_url 
+                    });
+
+                    return (
+                      <div className="p-3 bg-neutral-950 border border-neutral-800 rounded-xl flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          {/* Circular 1:1 Homepage preview */}
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-neutral-900 bg-neutral-100 flex-shrink-0 shadow-xs">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={activeIconUrl}
+                                alt="Category 1:1 circular"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <span className="text-[9px] text-neutral-400 uppercase tracking-wider font-semibold">Circular (Slider)</span>
                           </div>
-                          <span className="text-[9px] text-neutral-400 uppercase tracking-wider font-semibold">Circular (Slider)</span>
+
+                          {/* Square 1:1 Card preview */}
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="w-16 h-16 rounded-lg overflow-hidden border border-neutral-300 bg-neutral-100 flex-shrink-0 shadow-xs">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={activeIconUrl}
+                                alt="Category 1:1 square"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <span className="text-[9px] text-neutral-400 uppercase tracking-wider font-semibold">Square (1:1)</span>
+                          </div>
                         </div>
 
-                        {/* Square 1:1 Card preview */}
-                        <div className="flex flex-col items-center gap-1">
-                          <div className="w-16 h-16 rounded-lg overflow-hidden border border-neutral-700 bg-black flex-shrink-0">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={formData.image_url}
-                              alt="Category 1:1 square"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <span className="text-[9px] text-neutral-400 uppercase tracking-wider font-semibold">Square (1:1)</span>
+                        <div className="text-right text-xs">
+                          <span className="text-neutral-400 text-[10px] block">Current Icon:</span>
+                          <span className="text-white font-mono text-[11px] truncate max-w-[140px] block">
+                            {activeIconUrl.split('/').pop()}
+                          </span>
                         </div>
                       </div>
+                    );
+                  })()}
 
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, image_url: '' })}
-                        className="p-1.5 text-neutral-400 hover:text-red-400 rounded-lg hover:bg-neutral-800 text-xs flex items-center gap-1"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        <span>Remove</span>
-                      </button>
+                  {/* Quick Icon Selector Gallery */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-neutral-400 mb-1.5 uppercase tracking-wider">
+                      Or Choose a Specific Category Icon:
+                    </label>
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-48 overflow-y-auto p-2 bg-neutral-950/60 border border-neutral-800 rounded-xl">
+                      {[
+                        { label: 'Watches', url: '/icons/categories/watches.svg' },
+                        { label: "Men's Fashion", url: '/icons/categories/mens-fashion.svg' },
+                        { label: 'Shirts', url: '/icons/categories/shirts.svg' },
+                        { label: 'Accessories', url: '/icons/categories/accessories.svg' },
+                        { label: 'Tech', url: '/icons/categories/tech.svg' },
+                        { label: 'Clothing', url: '/icons/categories/clothing.svg' },
+                        { label: 'Home', url: '/icons/categories/home.svg' },
+                        { label: 'Lifestyle', url: '/icons/categories/lifestyle.svg' },
+                        { label: 'Beauty', url: '/icons/categories/beauty.svg' },
+                        { label: 'Shoes', url: '/icons/categories/shoes.svg' },
+                        { label: 'Bags', url: '/icons/categories/bags.svg' },
+                        { label: 'Sports', url: '/icons/categories/sports.svg' },
+                        { label: 'Gaming', url: '/icons/categories/gaming.svg' },
+                        { label: 'Jewelry', url: '/icons/categories/jewelry.svg' },
+                        { label: 'Food', url: '/icons/categories/food.svg' },
+                        { label: 'Kids', url: '/icons/categories/kids.svg' },
+                        { label: 'Other', url: '/icons/categories/other.svg' },
+                      ].map((item) => {
+                        const isSelected = formData.image_url === item.url;
+                        return (
+                          <button
+                            key={item.url}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, image_url: item.url })}
+                            className={`p-1.5 rounded-lg border flex flex-col items-center gap-1 transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-white text-black border-white shadow-sm'
+                                : 'bg-neutral-900 border-neutral-800 text-neutral-300 hover:border-neutral-500'
+                            }`}
+                          >
+                            <div className="w-8 h-8 rounded-full bg-neutral-100 overflow-hidden border border-neutral-400 shrink-0">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={item.url} alt={item.label} className="w-full h-full object-cover" />
+                            </div>
+                            <span className="text-[9px] font-bold truncate max-w-full">{item.label}</span>
+                          </button>
+                        );
+                      })}
                     </div>
-                  ) : null}
+                  </div>
 
-                  {/* Upload button from PC */}
-                  <label className="border-2 border-dashed border-neutral-700 hover:border-neutral-400 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors bg-neutral-950/60 hover:bg-neutral-950 group">
+                  {/* Upload button from PC (Optional) */}
+                  <label className="border border-dashed border-neutral-700 hover:border-neutral-400 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer transition-colors bg-neutral-950/40 hover:bg-neutral-950 group">
                     <input
                       type="file"
                       accept="image/*"
@@ -423,20 +495,13 @@ export default function AdminCategoriesPage() {
                     />
                     {uploadingImage ? (
                       <div className="flex items-center gap-2 text-neutral-300 py-1">
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        <span className="text-xs font-medium">Uploading 1:1 photo to Supabase storage...</span>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-xs font-medium">Uploading custom photo...</span>
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center gap-1 py-1 text-center">
-                        <div className="w-9 h-9 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-300 group-hover:text-white mb-1">
-                          <Upload className="w-4 h-4" />
-                        </div>
-                        <span className="text-xs font-semibold text-neutral-200">
-                          {formData.image_url ? 'Replace 1:1 Photo from PC' : 'Upload 1:1 Category Photo from PC'}
-                        </span>
-                        <span className="text-[10px] text-neutral-500">
-                          Recommended square aspect ratio 1:1 (e.g. 600x600 px). Saved to Supabase bucket.
-                        </span>
+                      <div className="flex items-center gap-2 text-center text-xs text-neutral-400 group-hover:text-white">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Upload custom 1:1 image file from PC</span>
                       </div>
                     )}
                   </label>
