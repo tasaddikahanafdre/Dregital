@@ -5,9 +5,13 @@ import { WishlistProvider } from '@/lib/WishlistContext';
 import LayoutShell from '@/components/LayoutShell';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://dregital.shop'),
   title: {
     default: 'Dregital',
     template: '%s | Dregital',
+  },
+  alternates: {
+    canonical: 'https://dregital.shop',
   },
   icons: {
     icon: [
@@ -23,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Dregital',
     description: 'Shop authentic technology, audio gear, smart gadgets, and computer accessories in Bangladesh.',
-    url: 'https://dregital.com',
+    url: 'https://dregital.shop',
     siteName: 'Dregital',
     locale: 'en_BD',
     type: 'website',
