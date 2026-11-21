@@ -20,7 +20,7 @@ import {
   ExternalLink,
   Star
 } from 'lucide-react';
-import { Product, Category, ProductVariant } from '@/lib/types';
+import { Product, Category, ProductVariant, ProductOption } from '@/lib/types';
 import { formatPrice } from '@/lib/utils';
 
 export default function AdminProductsPage() {
@@ -59,7 +59,11 @@ export default function AdminProductsPage() {
   // Specifications State (key-value pairs)
   const [specs, setSpecs] = useState<Array<{ key: string; value: string }>>([]);
 
-  // Variations State
+  // Multiple Options State (Colour, Size, Storage, etc.)
+  const [options, setOptions] = useState<Array<{ name: string; values: string[] }>>([]);
+  const [newValInputs, setNewValInputs] = useState<Record<number, string>>({});
+
+  // Variations / Price Adjustments State
   const [variants, setVariants] = useState<Array<{
     variant_name: string;
     variant_value: string;
@@ -119,6 +123,8 @@ export default function AdminProductsPage() {
       is_bestseller: false
     });
     setSpecs([{ key: 'Color', value: '' }]);
+    setOptions([]);
+    setNewValInputs({});
     setVariants([]);
     setGalleryImages([]);
     setIsModalOpen(true);
@@ -154,6 +160,32 @@ export default function AdminProductsPage() {
     } else {
       setSpecs([{ key: '', value: '' }]);
     }
+
+    // Parse options (Colour, Size, etc.)
+    if (Array.isArray(p.options) && p.options.length > 0) {
+      setOptions(p.options.map(o => ({
+        name: o.name || '',
+        values: Array.isArray(o.values) ? [...o.values] : []
+      })));
+    } else if (Array.isArray(p.variants) && p.variants.length > 0) {
+      // Intelligently group legacy variants into option groups
+      const groupMap = new Map<string, Set<string>>();
+      p.variants.forEach(v => {
+        const name = (v.variant_name || 'Option').trim();
+        const val = (v.variant_value || '').trim();
+        if (name && val) {
+          if (!groupMap.has(name)) groupMap.set(name, new Set());
+          groupMap.get(name)!.add(val);
+        }
+      });
+      setOptions(Array.from(groupMap.entries()).map(([name, valSet]) => ({
+        name,
+        values: Array.from(valSet)
+      })));
+    } else {
+      setOptions([]);
+    }
+    setNewValInputs({});
 
     // Parse variants
     if (Array.isArray(p.variants) && p.variants.length > 0) {
@@ -304,16 +336,38 @@ export default function AdminProductsPage() {
       is_primary: url.trim() === primaryImgUrl
     }));
 
-    // Format variants
-    const variantsPayload = variants.filter(v => v.variant_name.trim() && v.variant_value.trim()).map((v, idx) => ({
+    // Format options (Colour, Size, Storage, etc.)
+    const validOptions = options
+      .filter(o => o.name.trim() && o.values.length > 0)
+      .map(o => ({
+        name: o.name.trim(),
+        values: o.values.map(v => v.trim()).filter(Boolean)
+      }));
+
+    // Format variants (preserve manual price adjustments or auto-derive from options)
+    let variantsPayload = variants.filter(v => v.variant_name.trim() && v.variant_value.trim()).map((v, idx) => ({
       id: `var-${Date.now()}-${idx}`,
       product_id: editingProduct?.id || '',
       variant_name: v.variant_name.trim(),
       variant_value: v.variant_value.trim(),
-      sku: v.sku.trim() || null,
+      sku: v.sku ? v.sku.trim() : null,
       price_adjustment: Number(v.price_adjustment) || 0,
       stock_quantity: Number(v.stock_quantity) || 0
     }));
+
+    if (variantsPayload.length === 0 && validOptions.length > 0) {
+      variantsPayload = validOptions.flatMap((opt, oIdx) =>
+        opt.values.map((val, vIdx) => ({
+          id: `var-${Date.now()}-${oIdx}-${vIdx}`,
+          product_id: editingProduct?.id || '',
+          variant_name: opt.name,
+          variant_value: val,
+          sku: null,
+          price_adjustment: 0,
+          stock_quantity: Number(formData.stock_quantity) || 10
+        }))
+      );
+    }
 
     const payload = {
       name: formData.name.trim(),
@@ -327,6 +381,7 @@ export default function AdminProductsPage() {
       image_url: primaryImgUrl,
       images: imagesPayload,
       specifications: specsObj,
+      options: validOptions,
       variants: variantsPayload,
       short_description: formData.short_description.trim(),
       description: formData.description.trim(),
@@ -959,90 +1014,259 @@ export default function AdminProductsPage() {
                   </div>
                 </div>
 
-                {/* 7. Product Variations (Size, Color, etc.) */}
-                <div>
-                  <div className="flex items-center justify-between pb-1 border-b border-neutral-800 mb-3">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-300">
-                      7. Product Variations (Optional)
-                    </h4>
-                    <button
-                      type="button"
-                      onClick={() => setVariants([...variants, {
-                        variant_name: 'Size',
-                        variant_value: '',
-                        sku: '',
-                        price_adjustment: 0,
-                        stock_quantity: 10
-                      }])}
-                      className="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-neutral-800 hover:bg-neutral-700 px-2.5 py-1 rounded transition-colors"
-                    >
-                      <Plus className="w-3 h-3" />
-                      Add Variation
-                    </button>
+                {/* 7. Product Options & Variations (Colour, Size, Storage, etc.) */}
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-neutral-800">
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-200">
+                        7. Product Options & Variations
+                      </h4>
+                      <p className="text-[11px] text-neutral-400 mt-0.5">
+                        Add multiple choices for customers (e.g. Colour, Size, Storage, Material).
+                      </p>
+                    </div>
+
+                    {/* Quick Preset Buttons */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const existingColor = options.find(o => o.name.toLowerCase() === 'colour' || o.name.toLowerCase() === 'color');
+                          if (!existingColor) {
+                            setOptions([...options, { name: 'Colour', values: ['Matte Black', 'Pearl White', 'Midnight Blue'] }]);
+                          }
+                        }}
+                        className="text-[10px] font-bold text-neutral-300 hover:text-white bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/80 px-2 py-1 rounded transition-colors cursor-pointer"
+                      >
+                        + Add Colour
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const existingSize = options.find(o => o.name.toLowerCase() === 'size');
+                          if (!existingSize) {
+                            setOptions([...options, { name: 'Size', values: ['S', 'M', 'L', 'XL'] }]);
+                          }
+                        }}
+                        className="text-[10px] font-bold text-neutral-300 hover:text-white bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/80 px-2 py-1 rounded transition-colors cursor-pointer"
+                      >
+                        + Add Size
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const existingStorage = options.find(o => o.name.toLowerCase() === 'storage' || o.name.toLowerCase() === 'capacity');
+                          if (!existingStorage) {
+                            setOptions([...options, { name: 'Storage', values: ['128GB', '256GB', '512GB'] }]);
+                          }
+                        }}
+                        className="text-[10px] font-bold text-neutral-300 hover:text-white bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/80 px-2 py-1 rounded transition-colors cursor-pointer"
+                      >
+                        + Add Storage
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setOptions([...options, { name: 'Option', values: [] }])}
+                        className="text-[10px] font-bold text-white bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 px-2.5 py-1 rounded transition-colors cursor-pointer inline-flex items-center gap-1"
+                      >
+                        <Plus className="w-3 h-3" />
+                        Custom Option
+                      </button>
+                    </div>
                   </div>
 
-                  {variants.length === 0 ? (
-                    <p className="text-[11px] text-neutral-500 italic">No variations added yet. (e.g. Size: S, M, L or Color: Black, Silver)</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {variants.map((v, index) => (
-                        <div key={index} className="grid grid-cols-1 sm:grid-cols-5 gap-2 p-2 bg-neutral-950 border border-neutral-800 rounded items-center">
-                          <input
-                            type="text"
-                            placeholder="Type (e.g. Size, Color)"
-                            value={v.variant_name}
-                            onChange={(e) => {
-                              const updated = [...variants];
-                              updated[index].variant_name = e.target.value;
-                              setVariants(updated);
-                            }}
-                            className="text-xs p-1.5 bg-neutral-900 border border-neutral-800 rounded text-white"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Value (e.g. XL, Black)"
-                            value={v.variant_value}
-                            onChange={(e) => {
-                              const updated = [...variants];
-                              updated[index].variant_value = e.target.value;
-                              setVariants(updated);
-                            }}
-                            className="text-xs p-1.5 bg-neutral-900 border border-neutral-800 rounded text-white"
-                          />
-                          <input
-                            type="number"
-                            placeholder="+/- Price (৳)"
-                            value={v.price_adjustment}
-                            onChange={(e) => {
-                              const updated = [...variants];
-                              updated[index].price_adjustment = Number(e.target.value);
-                              setVariants(updated);
-                            }}
-                            className="text-xs p-1.5 bg-neutral-900 border border-neutral-800 rounded text-white"
-                          />
-                          <input
-                            type="number"
-                            placeholder="Variant Stock"
-                            value={v.stock_quantity}
-                            onChange={(e) => {
-                              const updated = [...variants];
-                              updated[index].stock_quantity = Number(e.target.value);
-                              setVariants(updated);
-                            }}
-                            className="text-xs p-1.5 bg-neutral-900 border border-neutral-800 rounded text-white"
-                          />
-                          <div className="flex items-center justify-end">
-                            <button
-                              type="button"
-                              onClick={() => setVariants(variants.filter((_, i) => i !== index))}
-                              className="p-1.5 text-neutral-500 hover:text-red-400"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                  {options.length === 0 ? (
+                    <div className="p-4 bg-neutral-950/60 border border-dashed border-neutral-800 rounded-lg text-center space-y-1">
+                      <p className="text-xs font-semibold text-neutral-300">No options added yet</p>
+                      <p className="text-[11px] text-neutral-500">
+                        Click the quick preset buttons above (e.g. <strong>+ Add Colour</strong>, <strong>+ Add Size</strong>) to allow customers to choose variations on the storefront.
+                      </p>
                     </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {options.map((opt, optIdx) => {
+                        const isColor = opt.name.toLowerCase().includes('colour') || opt.name.toLowerCase().includes('color');
+                        return (
+                          <div key={optIdx} className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl space-y-3">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2 flex-1 max-w-xs">
+                                <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">Option:</span>
+                                <input
+                                  type="text"
+                                  value={opt.name}
+                                  placeholder="e.g. Colour, Size"
+                                  onChange={(e) => {
+                                    const updated = [...options];
+                                    updated[optIdx].name = e.target.value;
+                                    setOptions(updated);
+                                  }}
+                                  className="w-full text-xs font-bold p-1.5 bg-neutral-900 border border-neutral-700 rounded text-white focus:outline-none focus:border-white"
+                                />
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => setOptions(options.filter((_, i) => i !== optIdx))}
+                                className="text-neutral-500 hover:text-red-400 p-1 transition cursor-pointer"
+                                title="Remove Option"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            {/* Current Values as Chips */}
+                            <div className="flex flex-wrap items-center gap-1.5 min-h-[30px]">
+                              {opt.values.length === 0 ? (
+                                <span className="text-[11px] text-neutral-500 italic">No values added yet. Type below and hit Enter.</span>
+                              ) : (
+                                opt.values.map((val) => (
+                                  <span
+                                    key={val}
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-neutral-900 border border-neutral-700 text-white"
+                                  >
+                                    {isColor && (
+                                      <span className="w-2.5 h-2.5 rounded-full border border-neutral-600 bg-neutral-400" />
+                                    )}
+                                    <span>{val}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const updated = [...options];
+                                        updated[optIdx].values = updated[optIdx].values.filter(v => v !== val);
+                                        setOptions(updated);
+                                      }}
+                                      className="text-neutral-400 hover:text-red-400 p-0.5 cursor-pointer"
+                                    >
+                                      ×
+                                    </button>
+                                  </span>
+                                ))
+                              )}
+                            </div>
+
+                            {/* Input to add new value */}
+                            <div className="flex items-center gap-2 pt-1">
+                              <input
+                                type="text"
+                                placeholder={isColor ? 'Add colour (e.g. Midnight Black, Silver, Blue)...' : 'Add value (e.g. S, M, L, XL)...'}
+                                value={newValInputs[optIdx] || ''}
+                                onChange={(e) => setNewValInputs({ ...newValInputs, [optIdx]: e.target.value })}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    const raw = newValInputs[optIdx] || '';
+                                    if (raw.trim()) {
+                                      const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
+                                      const updated = [...options];
+                                      const set = new Set(updated[optIdx].values);
+                                      parts.forEach(p => set.add(p));
+                                      updated[optIdx].values = Array.from(set);
+                                      setOptions(updated);
+                                      setNewValInputs({ ...newValInputs, [optIdx]: '' });
+                                    }
+                                  }
+                                }}
+                                className="flex-1 text-xs p-2 bg-neutral-900 border border-neutral-800 rounded text-neutral-200 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const raw = newValInputs[optIdx] || '';
+                                  if (raw.trim()) {
+                                    const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
+                                    const updated = [...options];
+                                    const set = new Set(updated[optIdx].values);
+                                    parts.forEach(p => set.add(p));
+                                    updated[optIdx].values = Array.from(set);
+                                    setOptions(updated);
+                                    setNewValInputs({ ...newValInputs, [optIdx]: '' });
+                                  }
+                                }}
+                                className="px-3 py-2 text-xs font-bold bg-white text-black hover:bg-neutral-200 rounded transition cursor-pointer"
+                              >
+                                Add
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Optional Price Adjustments per Variant */}
+                  {options.length > 0 && (
+                    <details className="text-xs bg-neutral-950/40 border border-neutral-800 rounded-xl p-3">
+                      <summary className="font-bold text-neutral-300 cursor-pointer hover:text-white">
+                        Advanced: Configure individual Price Adjustments (+/- ৳)
+                      </summary>
+                      <div className="pt-3 space-y-2">
+                        <div className="flex justify-between items-center mb-2">
+                          <p className="text-[11px] text-neutral-500">
+                            Add custom price surcharges or discounts for specific option values (e.g. +৳200 for 256GB or XL).
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setVariants([...variants, {
+                              variant_name: options[0]?.name || 'Option',
+                              variant_value: options[0]?.values[0] || '',
+                              sku: '',
+                              price_adjustment: 0,
+                              stock_quantity: 10
+                            }])}
+                            className="text-[10px] font-bold text-neutral-300 bg-neutral-800 hover:bg-neutral-700 px-2 py-1 rounded"
+                          >
+                            + Add Price Rule
+                          </button>
+                        </div>
+
+                        {variants.map((v, index) => (
+                          <div key={index} className="grid grid-cols-1 sm:grid-cols-4 gap-2 p-2 bg-neutral-900 border border-neutral-800 rounded items-center">
+                            <input
+                              type="text"
+                              placeholder="Option (e.g. Size)"
+                              value={v.variant_name}
+                              onChange={(e) => {
+                                const updated = [...variants];
+                                updated[index].variant_name = e.target.value;
+                                setVariants(updated);
+                              }}
+                              className="text-xs p-1.5 bg-neutral-950 border border-neutral-800 rounded text-white"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Value (e.g. 256GB)"
+                              value={v.variant_value}
+                              onChange={(e) => {
+                                const updated = [...variants];
+                                updated[index].variant_value = e.target.value;
+                                setVariants(updated);
+                              }}
+                              className="text-xs p-1.5 bg-neutral-950 border border-neutral-800 rounded text-white"
+                            />
+                            <input
+                              type="number"
+                              placeholder="+/- Price (৳)"
+                              value={v.price_adjustment}
+                              onChange={(e) => {
+                                const updated = [...variants];
+                                updated[index].price_adjustment = Number(e.target.value);
+                                setVariants(updated);
+                              }}
+                              className="text-xs p-1.5 bg-neutral-950 border border-neutral-800 rounded text-white font-mono"
+                            />
+                            <div className="flex items-center justify-end">
+                              <button
+                                type="button"
+                                onClick={() => setVariants(variants.filter((_, i) => i !== index))}
+                                className="p-1 text-neutral-500 hover:text-red-400"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
                   )}
                 </div>
 

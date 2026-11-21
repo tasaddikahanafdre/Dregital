@@ -103,7 +103,9 @@ export default function CheckoutPage() {
           product_price: item.product.price,
           quantity: item.quantity,
           product_sku: item.product.sku,
-          variant_details: item.variant ? `${item.variant.variant_name}: ${item.variant.variant_value}` : null,
+          variant_details: item.selected_options && Object.keys(item.selected_options).length > 0
+            ? Object.entries(item.selected_options).map(([k, v]) => `${k}: ${v}`).join(', ')
+            : (item.variant ? `${item.variant.variant_name}: ${item.variant.variant_value}` : null),
           image_url: item.product.image_url
         }))
       };

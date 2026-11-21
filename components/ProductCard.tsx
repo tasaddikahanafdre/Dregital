@@ -90,11 +90,18 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           <Link 
             href={`/product/${product.slug}`}
-            className="text-[11px] sm:text-sm font-semibold text-neutral-900 group-hover:text-black line-clamp-2 transition-colors mb-1.5 sm:mb-2 leading-tight sm:leading-snug min-h-[26px] sm:min-h-0"
+            className="text-[11px] sm:text-sm font-semibold text-neutral-900 group-hover:text-black line-clamp-2 transition-colors mb-1 leading-tight sm:leading-snug min-h-[26px] sm:min-h-0"
             title={product.name}
           >
             {product.name}
           </Link>
+
+          {/* Options / Colours preview */}
+          {product.options && product.options.length > 0 && (
+            <p className="text-[10px] text-neutral-500 mb-1.5 truncate">
+              {product.options.map(o => `${o.values.length} ${o.name}`).join(' • ')}
+            </p>
+          )}
         </div>
 
         <div className="pt-1 sm:pt-2">

@@ -134,13 +134,21 @@ export default function CartDrawer() {
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-2 mt-0.5 text-[10px] sm:text-[11px] text-neutral-500">
+                    <div className="flex items-center gap-2 mt-0.5 text-[10px] sm:text-[11px] text-neutral-500 flex-wrap">
                       <span>{formatPrice(item.product.price)} each</span>
                       {item.variant && (
                         <>
                           <span>•</span>
                           <span className="text-neutral-700 font-medium">
                             {item.variant.variant_name}: {item.variant.variant_value}
+                          </span>
+                        </>
+                      )}
+                      {item.selected_options && Object.keys(item.selected_options).length > 0 && (
+                        <>
+                          <span>•</span>
+                          <span className="text-neutral-700 font-medium">
+                            {Object.entries(item.selected_options).map(([k, v]) => `${k}: ${v}`).join(' / ')}
                           </span>
                         </>
                       )}

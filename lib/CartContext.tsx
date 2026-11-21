@@ -4,15 +4,21 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, ProductVariant } from './types';
 
 export interface CartItem {
-  id: string; // unique item id (composite of product.id + variant?.id)
+  id: string; // unique item id (composite of product.id + variant?.id + options)
   product: Product;
   quantity: number;
   variant?: ProductVariant | null;
+  selected_options?: Record<string, string>;
 }
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product, quantity?: number, variant?: ProductVariant | null) => void;
+  addToCart: (
+    product: Product, 
+    quantity?: number, 
+    variant?: ProductVariant | null, 
+    selectedOptions?: Record<string, string>
+  ) => void;
   removeFromCart: (cartItemId: string) => void;
   updateQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
@@ -58,8 +64,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [cart, isHydrated]);
 
-  const addToCart = (product: Product, quantity = 1, variant: ProductVariant | null = null) => {
-    const itemId = variant ? `${product.id}-${variant.id}` : product.id;
+  const addToCart = (
+    product: Product, 
+    quantity = 1, 
+    variant: ProductVariant | null = null,
+    selectedOptions?: Record<string, string>
+  ) => {
+    const optionsKey = selectedOptions && Object.keys(selectedOptions).length > 0
+      ? Object.entries(selectedOptions).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `${k}:${v}`).join('|')
+      : '';
+    const itemId = `${product.id}${variant ? `-${variant.id}` : ''}${optionsKey ? `-${optionsKey}` : ''}`;
 
     setCart(prev => {
       const existing = prev.find(item => item.id === itemId);
@@ -67,7 +81,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const newQty = existing.quantity + quantity;
         return prev.map(item => item.id === itemId ? { ...item, quantity: newQty } : item);
       }
-      return [...prev, { id: itemId, product, quantity, variant }];
+      return [...prev, { id: itemId, product, quantity, variant, selected_options: selectedOptions }];
     });
 
     setIsCartOpen(true);

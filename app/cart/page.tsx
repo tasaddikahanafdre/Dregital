@@ -315,6 +315,14 @@ export default function CartPage() {
                             </span>
                           </>
                         )}
+                        {item.selected_options && Object.keys(item.selected_options).length > 0 && (
+                          <>
+                            <span>•</span>
+                            <span className="text-neutral-700 font-medium">
+                              {Object.entries(item.selected_options).map(([k, v]) => `${k}: ${v}`).join(' / ')}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
 
@@ -621,6 +629,14 @@ export default function CartPage() {
                                   <span>•</span>
                                   <span className="bg-neutral-100 text-neutral-700 px-1.5 py-0.5 rounded text-[10px]">
                                     {item.variant.variant_name}: {item.variant.variant_value}
+                                  </span>
+                                </>
+                              )}
+                              {item.selected_options && Object.keys(item.selected_options).length > 0 && (
+                                <>
+                                  <span>•</span>
+                                  <span className="bg-neutral-100 text-neutral-700 px-1.5 py-0.5 rounded text-[10px]">
+                                    {Object.entries(item.selected_options).map(([k, v]) => `${k}: ${v}`).join(' / ')}
                                   </span>
                                 </>
                               )}

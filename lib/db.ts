@@ -376,6 +376,7 @@ export const db = {
           : [],
       specifications: productData.specifications || {},
       variants: Array.isArray(productData.variants) ? productData.variants : [],
+      options: Array.isArray(productData.options) ? productData.options : [],
       is_active: productData.is_active !== undefined ? Boolean(productData.is_active) : true,
       is_featured: Boolean(productData.is_featured),
       is_bestseller: Boolean(productData.is_bestseller),
@@ -410,6 +411,7 @@ export const db = {
       is_bestseller: updates.is_bestseller !== undefined ? Boolean(updates.is_bestseller) : current.is_bestseller,
       specifications: updates.specifications !== undefined ? updates.specifications : current.specifications,
       variants: updates.variants !== undefined ? updates.variants : current.variants,
+      options: updates.options !== undefined ? updates.options : current.options,
       images: updates.images !== undefined ? updates.images : current.images,
       image_url: updates.image_url !== undefined ? updates.image_url : current.image_url,
       updated_at: new Date().toISOString()

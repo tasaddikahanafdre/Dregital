@@ -33,14 +33,19 @@ export interface ProductImage {
   is_primary: boolean;
 }
 
+export interface ProductOption {
+  name: string; // e.g. "Color", "Size", "Storage", "Edition"
+  values: string[]; // e.g. ["Matte Black", "Silver", "Midnight Blue"]
+}
+
 export interface ProductVariant {
   id: string;
-  product_id: string;
+  product_id?: string;
   variant_name: string;
   variant_value: string;
   sku?: string | null;
-  price_adjustment: number;
-  stock_quantity: number;
+  price_adjustment?: number;
+  stock_quantity?: number;
 }
 
 export interface Product {
@@ -71,6 +76,7 @@ export interface Product {
   brand?: Brand | null;
   images?: ProductImage[];
   variants?: ProductVariant[];
+  options?: ProductOption[];
   image_url?: string; // convenient primary image accessor
 }
 
