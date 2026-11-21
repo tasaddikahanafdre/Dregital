@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   Lock,
-  Image as ImageIcon
+  Image as ImageIcon,
+  DownloadCloud
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -85,6 +86,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Products', href: '/admin/products', icon: Package },
+    { name: 'Product Importer', href: '/admin/importer', icon: DownloadCloud },
     { name: 'Categories', href: '/admin/categories', icon: FolderTree },
     { name: 'Banners (16:9)', href: '/admin/banners', icon: ImageIcon },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },

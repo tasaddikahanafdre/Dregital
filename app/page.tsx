@@ -1,9 +1,14 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { db } from '@/lib/db';
 import ProductCard from '@/components/ProductCard';
 import CategorySlider from '@/components/CategorySlider';
 import HeroSlider from '@/components/HeroSlider';
+
+export const metadata: Metadata = {
+  title: 'Dregital',
+};
 
 export const revalidate = 0; // Dynamic data for instant admin updates
 

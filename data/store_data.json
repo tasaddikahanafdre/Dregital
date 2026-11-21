@@ -1,595 +1,404 @@
 {
-  "categories": [
+  "pages": [
     {
-      "id": "cat-tech-001",
-      "parent_id": null,
-      "name": "Tech",
-      "slug": "tech",
-      "description": "Cutting-edge audio gear, wearable technology, computing devices & daily gadgets.",
-      "icon_name": "Laptop",
-      "image_url": "/icons/categories/tech.svg",
-      "display_order": 1,
-      "is_active": true,
-      "is_featured": true
+      "id": "page-about",
+      "slug": "about-us",
+      "title": "About Dregital",
+      "content": "Dregital is an independent modern retail and e-commerce platform in Bangladesh offering genuine tech, food, clothing, kids, and home goods with nationwide delivery."
     },
     {
-      "id": "cat-food-002",
-      "parent_id": null,
-      "name": "Food",
-      "slug": "food",
-      "description": "Artisanal provisions, organic pantry essentials, gourmet coffee & treats.",
-      "icon_name": "Utensils",
-      "image_url": "/icons/categories/food.svg",
-      "display_order": 2,
-      "is_active": true,
-      "is_featured": true
+      "id": "page-terms",
+      "slug": "terms-and-conditions",
+      "title": "Terms & Conditions",
+      "content": "Welcome to Dregital. By using our website and placing orders, you agree to comply with our store terms and purchasing conditions."
     },
     {
-      "id": "cat-clothing-003",
-      "parent_id": null,
-      "name": "Clothing",
-      "slug": "clothing",
-      "description": "Contemporary minimalist apparel, premium everyday wear & outerwear.",
-      "icon_name": "Shirt",
-      "image_url": "/icons/categories/clothing.svg",
-      "display_order": 3,
-      "is_active": true,
-      "is_featured": true
+      "id": "page-privacy",
+      "slug": "privacy-policy",
+      "title": "Privacy Policy",
+      "content": "Your privacy is paramount. We safeguard all personal data, shipping details, and transaction information in accordance with international security best practices."
     },
     {
-      "id": "cat-kids-004",
-      "parent_id": null,
-      "name": "Kids",
-      "slug": "kids",
-      "description": "Nordic wooden toys, developmental activity sets & organic essentials.",
-      "icon_name": "Smile",
-      "image_url": "/icons/categories/kids.svg",
-      "display_order": 4,
-      "is_active": true,
-      "is_featured": true
+      "id": "page-shipping",
+      "slug": "shipping-policy",
+      "title": "Shipping Policy",
+      "content": "We deliver nationwide across all 64 districts in Bangladesh with reliable courier partners. Inside Dhaka: 24-48 Hours. Outside Dhaka: 2-4 Days."
     },
     {
-      "id": "cat-home-005",
-      "parent_id": null,
-      "name": "Home",
-      "slug": "home",
-      "description": "Modern ceramic decor, ambient lighting, kitchenware & living accents.",
-      "icon_name": "Home",
-      "image_url": "/icons/categories/home.svg",
-      "display_order": 5,
-      "is_active": true,
-      "is_featured": true
-    },
-    {
-      "id": "cat-other-006",
-      "parent_id": null,
-      "name": "Other",
-      "slug": "other",
-      "description": "Full-grain leather goods, desk accessories & curated lifestyle gear.",
-      "icon_name": "Package",
-      "image_url": "/icons/categories/other.svg",
-      "display_order": 6,
-      "is_active": true,
-      "is_featured": true
+      "id": "page-refund",
+      "slug": "refund-policy",
+      "title": "Refund & Return Policy",
+      "content": "We offer an easy 7-day replacement warranty for verified manufacturing defects. Please contact support with your order number."
     }
   ],
-  "products": [
+  "orders": [
     {
-      "id": "prod-aura-headphones",
-      "name": "Aura Pro Wireless ANC Studio Headphones",
-      "slug": "aura-pro-wireless-anc-studio-headphones",
-      "sku": "DRG-AUD-001",
-      "model_number": "AP-ANC90",
-      "short_description": "Active noise cancellation, 35-hour battery life, and custom 40mm beryllium drivers.",
-      "description": "Engineered for pure acoustic transparency, the Aura Pro delivers hybrid active noise cancellation, low-latency Bluetooth 5.3 multipoint pairing, plush memory foam ear cushions, and up to 35 hours of continuous high-fidelity listening reserve.",
-      "price": 18500,
-      "original_price": 22500,
-      "stock_quantity": 24,
-      "low_stock_threshold": 4,
-      "category_id": "cat-tech-001",
-      "image_url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
-      "images": [
+      "id": "ord-1795211048497",
+      "area": "Dhaka",
+      "items": [
         {
-          "id": "img-aura-1",
-          "product_id": "prod-aura-headphones",
+          "quantity": 1,
+          "subtotal": 18500,
           "image_url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
+          "product_id": "prod-aura-headphones",
+          "product_name": "Aura Pro Wireless ANC Studio Headphones",
+          "product_price": 18500
         }
       ],
-      "specifications": {
-        "Acoustic Driver": "40mm Custom Beryllium Diaphragm",
-        "Battery Life": "Up to 35 Hours (ANC On)",
-        "Connectivity": "Bluetooth 5.3 Multipoint + 3.5mm Aux",
-        "Charging": "USB Type-C Fast Charge (10 min for 4 hrs)",
-        "Weight": "250g Lightweight Ergonomic"
-      },
-      "variants": [
-        {
-          "id": "var-aura-black",
-          "product_id": "prod-aura-headphones",
-          "variant_name": "Color",
-          "variant_value": "Matte Black",
-          "sku": "DRG-AUD-001-BLK",
-          "price_adjustment": 0,
-          "stock_quantity": 14
-        },
-        {
-          "id": "var-aura-silver",
-          "product_id": "prod-aura-headphones",
-          "variant_name": "Color",
-          "variant_value": "Pearl Silver",
-          "sku": "DRG-AUD-001-SLV",
-          "price_adjustment": 0,
-          "stock_quantity": 10
-        }
-      ],
-      "is_active": true,
-      "is_featured": true,
-      "is_bestseller": true,
-      "warranty_info": "1 Year Official Brand Warranty",
-      "created_at": "2026-11-20T12:59:00.000Z",
-      "updated_at": "2026-11-20T12:59:00.000Z"
+      "district": "Dhaka",
+      "subtotal": 18500,
+      "created_at": "2026-11-20T21:44:08.497Z",
+      "updated_at": "2026-11-20T21:44:08.497Z",
+      "customer_id": null,
+      "order_number": "DRG-2026-1001",
+      "order_status": "Pending",
+      "total_amount": 18570,
+      "customer_name": "Dregital Customer",
+      "shipping_city": "Dhaka",
+      "customer_email": null,
+      "customer_phone": "01700000000",
+      "payment_method": "Cash on Delivery",
+      "payment_status": "Pending",
+      "delivery_charge": 70,
+      "discount_amount": 0,
+      "delivery_address": "Delivery Address Confirmed",
+      "shipping_address": "Delivery Address Confirmed",
+      "shipping_district": "Dhaka"
     },
     {
-      "id": "prod-chronos-watch",
-      "name": "Chronos Minimalist Titanium Smartwatch",
-      "slug": "chronos-minimalist-titanium-smartwatch",
-      "sku": "DRG-WCH-002",
-      "model_number": "CH-TITAN",
-      "short_description": "Aerospace-grade titanium casing with 1.43\" AMOLED display and 12-day battery.",
-      "description": "Crafted from a solid block of aerospace-grade titanium with scratch-resistant sapphire crystal glass. Features high-precision health sensors, always-on AMOLED display, Bluetooth calling with noise-cancelling microphone, and 5ATM water resistance.",
-      "price": 14200,
-      "original_price": 16800,
-      "stock_quantity": 18,
-      "low_stock_threshold": 3,
-      "category_id": "cat-tech-001",
-      "image_url": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
-      "images": [
+      "id": "ord-1795211760055",
+      "items": [
         {
-          "id": "img-chronos-1",
-          "product_id": "prod-chronos-watch",
+          "quantity": 1,
           "image_url": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
+          "product_id": "prod-chronos-watch",
+          "product_sku": "DRG-WCH-002",
+          "product_name": "Chronos Minimalist Titanium Smartwatch",
+          "product_price": 14200,
+          "variant_details": null
         }
       ],
-      "specifications": {
-        "Case Material": "Grade 5 Aerospace Titanium",
-        "Display": "1.43\" HD AMOLED 466x466 (1000 nits)",
-        "Water Resistance": "5ATM (Up to 50 meters)",
-        "Battery Runtime": "12 Days Typical Usage",
-        "Sensors": "Heart Rate, SpO2, Sleep & Stress Tracking"
-      },
-      "variants": [],
-      "is_active": true,
-      "is_featured": true,
-      "is_bestseller": true,
-      "warranty_info": "1 Year Official Warranty",
-      "created_at": "2026-11-20T12:58:00.000Z",
-      "updated_at": "2026-11-20T12:58:00.000Z"
-    },
-    {
-      "id": "prod-ethiopian-coffee",
-      "name": "Single-Origin Ethiopian Yirgacheffe Coffee Beans (250g)",
-      "slug": "single-origin-ethiopian-yirgacheffe-coffee-beans",
-      "sku": "DRG-COF-003",
-      "model_number": "ETH-YIRG-250",
-      "short_description": "Artisan roasted whole beans with delicate floral jasmine and citrus notes.",
-      "description": "Cultivated at 2,100 meters elevation in the highlands of Yirgacheffe, Ethiopia. Washed process beans micro-roasted to perfection in small batches to preserve nuanced aromas of jasmine florals, bergamot citrus, and honey sweetness.",
-      "price": 1650,
-      "original_price": 1950,
-      "stock_quantity": 40,
-      "low_stock_threshold": 5,
-      "category_id": "cat-food-002",
-      "image_url": "https://images.unsplash.com/photo-1587734195503-904fca47e0e9?auto=format&fit=crop&w=800&q=80",
-      "images": [
-        {
-          "id": "img-coffee-1",
-          "product_id": "prod-ethiopian-coffee",
-          "image_url": "https://images.unsplash.com/photo-1587734195503-904fca47e0e9?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
-        }
-      ],
-      "specifications": {
-        "Origin": "Yirgacheffe, Gedeo Zone, Ethiopia",
-        "Altitude": "2,000 - 2,200m",
-        "Process": "Washed, Sun-dried on raised beds",
-        "Roast Level": "Medium Light Roast",
-        "Net Weight": "250g Whole Bean"
-      },
-      "variants": [],
-      "is_active": true,
-      "is_featured": true,
-      "is_bestseller": false,
-      "warranty_info": "Freshness Sealed Guarantee",
-      "created_at": "2026-11-20T12:57:00.000Z",
-      "updated_at": "2026-11-20T12:57:00.000Z"
-    },
-    {
-      "id": "prod-organic-tee",
-      "name": "Heavyweight 280GSM Organic Cotton Oversized Tee",
-      "slug": "heavyweight-280gsm-organic-cotton-oversized-tee",
-      "sku": "DRG-TEE-005",
-      "model_number": "HW-TEE-280",
-      "short_description": "Pre-shrunk combed organic cotton jersey with ribbed collar and drop shoulders.",
-      "description": "Tailored from premium 280 GSM combed organic cotton for substantial drape and supreme softness. Features dropped shoulder seams, structured collar, and a modern relaxed silhouette suitable for everyday wear.",
-      "price": 1850,
-      "original_price": 2300,
-      "stock_quantity": 50,
-      "low_stock_threshold": 8,
-      "category_id": "cat-clothing-003",
-      "image_url": "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
-      "images": [
-        {
-          "id": "img-tee-1",
-          "product_id": "prod-organic-tee",
-          "image_url": "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
-        }
-      ],
-      "specifications": {
-        "Material": "100% GOTS Certified Organic Cotton",
-        "Fabric Weight": "280 GSM Heavyweight Double Knit",
-        "Fit": "Relaxed Oversized Drop-Shoulder",
-        "Care": "Machine wash cold inside out"
-      },
-      "variants": [
-        {
-          "id": "var-tee-m",
-          "product_id": "prod-organic-tee",
-          "variant_name": "Size",
-          "variant_value": "Medium (M)",
-          "sku": "DRG-TEE-005-M",
-          "price_adjustment": 0,
-          "stock_quantity": 25
-        },
-        {
-          "id": "var-tee-l",
-          "product_id": "prod-organic-tee",
-          "variant_name": "Size",
-          "variant_value": "Large (L)",
-          "sku": "DRG-TEE-005-L",
-          "price_adjustment": 0,
-          "stock_quantity": 25
-        }
-      ],
-      "is_active": true,
-      "is_featured": true,
-      "is_bestseller": true,
-      "warranty_info": "7-Day Fitting Exchange",
-      "created_at": "2026-11-20T12:56:00.000Z",
-      "updated_at": "2026-11-20T12:56:00.000Z"
-    },
-    {
-      "id": "prod-ceramic-lamp",
-      "name": "Fluted Matte Terracotta Ceramic Table Lamp",
-      "slug": "fluted-matte-terracotta-ceramic-table-lamp",
-      "sku": "DRG-HOM-009",
-      "model_number": "LMP-TC-FLUTED",
-      "short_description": "Hand-cast matte ceramic base paired with raw textured Belgian linen shade.",
-      "description": "Bring architectural warmth into your living room or bedside with this handcrafted fluted terracotta table lamp. Features a tactile matte stoneware finish, solid brass accents, and a custom raw Belgian linen drum shade for diffuse ambient illumination.",
-      "price": 5800,
-      "original_price": 7200,
-      "stock_quantity": 15,
-      "low_stock_threshold": 3,
-      "category_id": "cat-home-005",
-      "image_url": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80",
-      "images": [
-        {
-          "id": "img-lamp-1",
-          "product_id": "prod-ceramic-lamp",
-          "image_url": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
-        }
-      ],
-      "specifications": {
-        "Base Material": "Hand-cast Matte Glazed Stoneware",
-        "Shade": "Natural Unbleached Belgian Linen",
-        "Height": "48cm Total Height (Base diameter 22cm)",
-        "Socket": "Standard E27 (Warm White LED bulb included)",
-        "Cord": "2-meter braided textile cord with inline toggle switch"
-      },
-      "variants": [],
-      "is_active": true,
-      "is_featured": true,
-      "is_bestseller": false,
-      "warranty_info": "1 Year Electrical Warranty",
-      "created_at": "2026-11-20T12:55:00.000Z",
-      "updated_at": "2026-11-20T12:55:00.000Z"
-    },
-    {
-      "id": "prod-leather-folio",
-      "name": "Full-Grain Tuscan Leather Daily Tech Folio",
-      "slug": "full-grain-tuscan-leather-daily-tech-folio",
-      "sku": "DRG-ACC-012",
-      "model_number": "FOLIO-TN-14",
-      "short_description": "Vegetable-tanned full-grain leather organizer fitting 14\" laptops and accessories.",
-      "description": "Hand-stitched by master leather artisans from supple vegetable-tanned Tuscan full-grain cowhide that develops a rich, personalized patina over time. Houses a 14-inch laptop, tablet, charger, cables, passport, and pens securely with a heavy-duty brass zipper.",
-      "price": 5200,
-      "original_price": 6400,
-      "stock_quantity": 16,
-      "low_stock_threshold": 3,
-      "category_id": "cat-other-006",
-      "image_url": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
-      "images": [
-        {
-          "id": "img-folio-1",
-          "product_id": "prod-leather-folio",
-          "image_url": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
-        }
-      ],
-      "specifications": {
-        "Leather": "Certified Full-Grain Tuscan Vegetable-Tanned Leather",
-        "Capacity": "Fits MacBook Pro 14\", iPad Pro 11\", Cables & Notes",
-        "Hardware": "Solid Brass Antique YKK Excella Zipper",
-        "Lining": "Soft Micro-suede Protective Interior"
-      },
-      "variants": [],
-      "is_active": true,
-      "is_featured": true,
-      "is_bestseller": true,
-      "warranty_info": "Lifetime Leather Quality Guarantee",
-      "created_at": "2026-11-20T12:54:00.000Z",
-      "updated_at": "2026-11-20T12:54:00.000Z"
-    },
-    {
-      "id": "prod-stormshield-jacket",
-      "name": "StormShield Minimalist Technical Windbreaker",
-      "slug": "stormshield-minimalist-technical-windbreaker",
-      "sku": "DRG-JKT-006",
-      "model_number": "SS-WB-PRO",
-      "short_description": "3-layer waterproof ripstop membrane with taped seams and YKK Aquaguard zips.",
-      "description": "Engineered for unpredictable weather, this technical windbreaker features a 3-layer breathable micro-ripstop shell with fully taped seams, YKK Aquaguard weather-sealed zippers, articulated storm hood, and adjustable hem drawstrings.",
-      "price": 6900,
-      "original_price": 8500,
-      "stock_quantity": 20,
-      "low_stock_threshold": 3,
-      "category_id": "cat-clothing-003",
-      "image_url": "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80",
-      "images": [
-        {
-          "id": "img-jkt-1",
-          "product_id": "prod-stormshield-jacket",
-          "image_url": "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
-        }
-      ],
-      "specifications": {
-        "Fabric": "3-Layer DWR Micro-Ripstop Nylon",
-        "Waterproof Rating": "15,000mm Hydrostatic Head",
-        "Zippers": "YKK Aquaguard Sealed Zippers",
-        "Pockets": "2 Fleece-lined Hand Pockets + 1 Internal Zip"
-      },
-      "variants": [],
-      "is_active": true,
-      "is_featured": true,
-      "is_bestseller": false,
-      "warranty_info": "1 Year Seam & Hardware Warranty",
-      "created_at": "2026-11-20T12:53:00.000Z",
-      "updated_at": "2026-11-20T12:53:00.000Z"
-    },
-    {
-      "id": "prod-beechwood-blocks",
-      "name": "Nordic Sustainable Beechwood Architectural Blocks",
-      "slug": "nordic-sustainable-beechwood-architectural-blocks",
-      "sku": "DRG-KID-007",
-      "model_number": "KID-BLOCK-50",
-      "short_description": "50 hand-finished solid beechwood shapes with food-grade water-based dyes.",
-      "description": "Inspire creative thinking and fine motor skills with this heirloom-quality 50-piece architectural building block set. Precision-crafted from sustainably harvested European beechwood, tumbled smooth and colored with non-toxic botanical pigments.",
-      "price": 3450,
-      "original_price": 4200,
-      "stock_quantity": 25,
-      "low_stock_threshold": 4,
-      "category_id": "cat-kids-004",
-      "image_url": "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=800&q=80",
-      "images": [
-        {
-          "id": "img-blocks-1",
-          "product_id": "prod-beechwood-blocks",
-          "image_url": "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
-        }
-      ],
-      "specifications": {
-        "Wood Type": "FSC Certified European Beechwood",
-        "Pieces": "50 Precision Geometric Blocks",
-        "Safety Standard": "EN71 & ASTM F963 Certified Non-Toxic",
-        "Storage": "Includes 100% Organic Cotton Canvas Bag"
-      },
-      "variants": [],
-      "is_active": true,
-      "is_featured": false,
-      "is_bestseller": true,
-      "warranty_info": "Child Safe Certified",
-      "created_at": "2026-11-20T12:52:00.000Z",
-      "updated_at": "2026-11-20T12:52:00.000Z"
-    },
-    {
-      "id": "prod-raw-honey",
-      "name": "Sundarbans Raw Wildflower Organic Honey (500g)",
-      "slug": "sundarbans-raw-wildflower-organic-honey",
-      "sku": "DRG-HNY-004",
-      "model_number": "SBN-RAW-500",
-      "short_description": "100% pure unfiltered raw wildflower honey harvested from forest apiaries.",
-      "description": "Ethically harvested from the pristine mangrove forests of the Sundarbans. Completely cold-extracted, unpasteurized, and micro-filtered without added heat to retain all active enzymes, pollen, and natural antioxidants.",
-      "price": 1250,
-      "original_price": 1500,
-      "stock_quantity": 35,
-      "low_stock_threshold": 5,
-      "category_id": "cat-food-002",
-      "image_url": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80",
-      "images": [
-        {
-          "id": "img-honey-1",
-          "product_id": "prod-raw-honey",
-          "image_url": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
-        }
-      ],
-      "specifications": {
-        "Type": "100% Raw Wildflower Mangrove Honey",
-        "Extraction": "Cold Extracted, Unfiltered",
-        "Weight": "500g Glass Jar",
-        "Purity": "No artificial sugar or additives"
-      },
-      "variants": [],
-      "is_active": true,
-      "is_featured": false,
-      "is_bestseller": true,
-      "warranty_info": "100% Lab Tested Purity Guarantee",
-      "created_at": "2026-11-20T12:51:00.000Z",
-      "updated_at": "2026-11-20T12:51:00.000Z"
-    },
-    {
-      "id": "prod-french-press",
-      "name": "Matte Black Thermal Double-Walled French Press",
-      "slug": "matte-black-thermal-double-walled-french-press",
-      "sku": "DRG-HOM-010",
-      "model_number": "FP-SS-800",
-      "short_description": "304 stainless steel double-wall vacuum insulation with ultra-fine mesh filter.",
-      "description": "Brew clean, full-bodied coffee without grounds or rapid heat loss. Made from indestructible food-grade 18/8 stainless steel with double-walled vacuum insulation that maintains optimal brewing temperature for up to two hours.",
-      "price": 3250,
-      "original_price": 3800,
-      "stock_quantity": 28,
-      "low_stock_threshold": 4,
-      "category_id": "cat-home-005",
-      "image_url": "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=800&q=80",
-      "images": [
-        {
-          "id": "img-press-1",
-          "product_id": "prod-french-press",
-          "image_url": "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
-        }
-      ],
-      "specifications": {
-        "Capacity": "800ml (3-4 Coffee Mugs)",
-        "Construction": "Double-Wall Food Grade 304 Stainless Steel",
-        "Filtration": "3-Stage Stainless Micron Screen Plunger",
-        "Finish": "Fingerprint-Resistant Matte Powdercoat"
-      },
-      "variants": [],
-      "is_active": true,
-      "is_featured": false,
-      "is_bestseller": true,
-      "warranty_info": "Lifetime Manufacturer Craftsmanship Warranty",
-      "created_at": "2026-11-20T12:50:00.000Z",
-      "updated_at": "2026-11-20T12:50:00.000Z"
-    },
-    {
-      "id": "prod-muslin-blanket",
-      "name": "Organic Muslin Cloud Baby Blanket & Swaddle Set",
-      "slug": "organic-muslin-cloud-baby-blanket-swaddle-set",
-      "sku": "DRG-KID-008",
-      "model_number": "MSL-SWD-2PK",
-      "short_description": "Breathable 4-layer GOTS certified organic muslin for delicate baby skin.",
-      "description": "Ultra-soft and breathable, this 4-layer pre-washed organic cotton muslin swaddle blanket provides gentle warmth while preventing overheating. Gets softer with every wash, perfect for tummy time, strollers, and nursing.",
-      "price": 2200,
-      "original_price": 2650,
-      "stock_quantity": 30,
-      "low_stock_threshold": 5,
-      "category_id": "cat-kids-004",
-      "image_url": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=800&q=80",
-      "images": [
-        {
-          "id": "img-muslin-1",
-          "product_id": "prod-muslin-blanket",
-          "image_url": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
-        }
-      ],
-      "specifications": {
-        "Fabric": "4-Layer 100% Combed Organic Cotton Muslin",
-        "Dimensions": "120cm x 120cm Generous Swaddle Size",
-        "Hypoallergenic": "Free from harmful chemical treatments"
-      },
-      "variants": [],
-      "is_active": true,
-      "is_featured": false,
-      "is_bestseller": false,
-      "warranty_info": "100% Organic Certified",
-      "created_at": "2026-11-20T12:49:00.000Z",
-      "updated_at": "2026-11-20T12:49:00.000Z"
-    },
-    {
-      "id": "prod-laptop-stand",
-      "name": "Anodized Aluminum Ergonomic Laptop Desk Stand",
-      "slug": "anodized-aluminum-ergonomic-laptop-desk-stand",
-      "sku": "DRG-ACC-011",
-      "model_number": "STD-ALU-15",
-      "short_description": "CNC machined sandblasted aluminum stand engineered for optimal posture and airflow.",
-      "description": "Machined from a single slab of aerospace aluminum, this minimalist laptop stand elevates screens by 15 cm to eye level, relieving cervical neck strain. Open ventilation cutouts accelerate passive cooling to keep MacBooks and laptops cool.",
-      "price": 3600,
-      "original_price": 4400,
-      "stock_quantity": 32,
-      "low_stock_threshold": 5,
-      "category_id": "cat-other-006",
-      "image_url": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=800&q=80",
-      "images": [
-        {
-          "id": "img-stand-1",
-          "product_id": "prod-laptop-stand",
-          "image_url": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=800&q=80",
-          "display_order": 1,
-          "is_primary": true
-        }
-      ],
-      "specifications": {
-        "Material": "Solid Sandblasted Anodized Aluminum Alloy",
-        "Compatibility": "All 11\" to 16\" Laptops & MacBooks",
-        "Protection": "Anti-slip Non-scratch Silicone Grip Pads",
-        "Cable Management": "Dedicated rear routing aperture"
-      },
-      "variants": [],
-      "is_active": true,
-      "is_featured": false,
-      "is_bestseller": false,
-      "warranty_info": "2 Years Durability Warranty",
-      "created_at": "2026-11-20T12:48:00.000Z",
-      "updated_at": "2026-11-20T12:48:00.000Z"
+      "subtotal": 0,
+      "created_at": "2026-11-20T21:56:00.055Z",
+      "updated_at": "2026-11-20T21:56:23.039Z",
+      "admin_notes": null,
+      "customer_id": null,
+      "order_number": "DRG-2026-1001",
+      "order_status": "Cancelled",
+      "total_amount": 0,
+      "customer_name": "Tasadddik Dre",
+      "shipping_city": "Dhaka",
+      "customer_email": "dregital.shop@gmail.com",
+      "customer_notes": null,
+      "customer_phone": "01880644806",
+      "payment_method": "Cash on Delivery",
+      "payment_status": "Pending",
+      "delivery_charge": 0,
+      "discount_amount": 0,
+      "shipping_address": "",
+      "shipping_district": "Dhaka"
     }
   ],
   "banners": [
     {
-      "id": "b-hero-01",
+      "id": "b-1795211671099",
       "title": "Welcome to Dregital",
+      "bg_color": null,
+      "position": "hero",
       "subtitle": "Discover curated collections across Tech, Food, Clothing, Kids, Home and more.",
-      "image_url": "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/banners/1795203876316_5vzon_ChatGPT_Image_Sep_9__2026__03_.png",
-      "target_url": "/shop",
+      "image_url": "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/banners/1795211688037_slhjr_Premium_Cordless_Vacuum_Showca.png",
+      "is_active": true,
+      "created_at": "2026-11-20T21:55:30.714424+00:00",
+      "target_url": "https://dregital.vercel.app/product/chronos-minimalist-titanium-smartwatch",
+      "text_color": null,
       "button_text": "EXPLORE",
-      "display_order": 11,
-      "is_active": true
+      "display_order": 1
     },
     {
-      "id": "b-1795205992167",
+      "id": "b-1795211698478",
       "title": "Welcome to Dregital",
+      "bg_color": null,
+      "position": "hero",
       "subtitle": "Discover curated collections across Tech, Food, Clothing, Kids, Home and more.",
-      "image_url": "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/banners/1795205998893_qdoq8_6b68b56b5f6e4d0e1198f826d02cbd.jpg",
+      "image_url": "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/banners/1795211708279_eqm6k_Four-Colour_Open_Earbud_Case_S.png",
+      "is_active": true,
+      "created_at": "2026-11-20T21:55:30.714424+00:00",
       "target_url": "/shop",
+      "text_color": null,
       "button_text": "EXPLORE",
-      "display_order": 2,
-      "is_active": true
+      "display_order": 2
     },
     {
-      "id": "b-1795207745398",
+      "id": "b-1795211715625",
       "title": "Welcome to Dregital",
+      "bg_color": null,
+      "position": "hero",
       "subtitle": "Discover curated collections across Tech, Food, Clothing, Kids, Home and more.",
-      "image_url": "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/banners/1795207769703_qkq69_Hopeful_IELTS_Study_Moment.png",
+      "image_url": "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/banners/1795211724970_pn8fx_Premium_Blue_Grooming_Kit_Disp.png",
+      "is_active": true,
+      "created_at": "2026-11-20T21:55:30.714424+00:00",
       "target_url": "/shop",
+      "text_color": null,
       "button_text": "EXPLORE",
-      "display_order": 3,
-      "is_active": true
+      "display_order": 3
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-moh-ms-8801",
+      "category_id": "cat-tech-001",
+      "name": "Aukey 65W GaN Dual Port Fast Wall Charger",
+      "slug": "aukey-65w-gan-dual-port-fast-wall-charger",
+      "sku": "MOH-CHG-65W",
+      "short_description": "Ultra-compact 65W GaN III fast charger with dual Type-C and USB-A power delivery.",
+      "description": "Next-generation Gallium Nitride (GaN) fast charger offering up to 65W ultra-high speed charging for laptops, tablets, and smartphones. Dual-port intelligent power allocation ensures safe, cool, and efficient operation.",
+      "price": 1850,
+      "cost_price": 1850,
+      "original_price": 2450,
+      "stock_quantity": 25,
+      "low_stock_threshold": 5,
+      "specifications": {
+        "supplier": "Mohasagor",
+        "supplier_id": "MS-8801",
+        "original_url": "https://dregital.mohasagor.com/product/aukey-65w-gan-charger",
+        "warranty": "1 Year Brand Warranty"
+      },
+      "image_url": "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8801_0_1795255736166.jpg",
+      "images": [
+        "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8801_0_1795255736166.jpg",
+        "https://images.unsplash.com/photo-1622445268462-337f1688c49a?auto=format&fit=crop&w=800&q=80"
+      ],
+      "is_active": true,
+      "is_featured": true,
+      "is_bestseller": true,
+      "rating_average": 4.9,
+      "rating_count": 8,
+      "created_at": "2026-11-21T10:08:57.545Z",
+      "updated_at": "2026-11-21T10:08:57.550Z"
+    },
+    {
+      "id": "prod-moh-ms-8802",
+      "category_id": "cat-tech-001",
+      "name": "Haylou Solar Pro Smartwatch AMOLED Bluetooth Calling",
+      "slug": "haylou-solar-pro-smartwatch-amoled-bluetooth-calling",
+      "sku": "MOH-WTH-HAYLOU",
+      "short_description": "1.43-inch HD AMOLED display with Bluetooth calling, IP68 waterproof and 100+ sports modes.",
+      "description": "Premium metal bezel smartwatch featuring an ultra-crisp Always-On AMOLED screen, dedicated speaker and microphone for crystal clear Bluetooth voice calls, comprehensive heart rate and SpO2 monitoring, and 7-day battery life.",
+      "price": 3200,
+      "cost_price": 3200,
+      "original_price": 4200,
+      "stock_quantity": 25,
+      "low_stock_threshold": 5,
+      "specifications": {
+        "supplier": "Mohasagor",
+        "supplier_id": "MS-8802",
+        "original_url": "https://dregital.mohasagor.com/product/haylou-solar-pro-smartwatch",
+        "warranty": "1 Year Brand Warranty"
+      },
+      "image_url": "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8802_0_1795255737783.jpg",
+      "images": [
+        "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8802_0_1795255737783.jpg",
+        "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8802_1_1795255738235.jpg"
+      ],
+      "is_active": true,
+      "is_featured": true,
+      "is_bestseller": true,
+      "rating_average": 4.9,
+      "rating_count": 8,
+      "created_at": "2026-11-21T10:08:58.665Z",
+      "updated_at": "2026-11-21T10:08:58.665Z"
+    },
+    {
+      "id": "prod-moh-ms-8803",
+      "category_id": "cat-tech-001",
+      "name": "Baseus Bowie M2+ ANC True Wireless Earbuds",
+      "slug": "baseus-bowie-m2-anc-true-wireless-earbuds",
+      "sku": "MOH-AUD-BOWIE",
+      "short_description": "-42dB Hybrid Active Noise Cancellation wireless earbuds with dual-channel low latency.",
+      "description": "Equipped with hybrid active noise cancellation technology, the Baseus Bowie M2+ eliminates ambient distractions up to -42dB. 4-mic ENC system ensures studio-grade voice clarity during calls. Bluetooth 5.2 with 30-hour total playback.",
+      "price": 2650,
+      "cost_price": 2650,
+      "original_price": 3500,
+      "stock_quantity": 25,
+      "low_stock_threshold": 5,
+      "specifications": {
+        "supplier": "Mohasagor",
+        "supplier_id": "MS-8803",
+        "original_url": "https://dregital.mohasagor.com/product/baseus-bowie-m2-anc-earbuds",
+        "warranty": "1 Year Brand Warranty"
+      },
+      "image_url": "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8803_0_1795255738763.jpg",
+      "images": [
+        "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8803_0_1795255738763.jpg",
+        "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8803_1_1795255739123.jpg"
+      ],
+      "is_active": true,
+      "is_featured": true,
+      "is_bestseller": true,
+      "rating_average": 4.9,
+      "rating_count": 8,
+      "created_at": "2026-11-21T10:08:59.417Z",
+      "updated_at": "2026-11-21T10:08:59.417Z"
+    },
+    {
+      "id": "prod-moh-ms-8804",
+      "category_id": "cat-clothing-003",
+      "name": "Minimalist Weatherproof Roll-top Laptop Backpack 20L",
+      "slug": "minimalist-weatherproof-roll-top-laptop-backpack-20l",
+      "sku": "MOH-BAG-ROLLTOP",
+      "short_description": "Water-resistant Oxford fabric urban commuter backpack with padded 15.6\" laptop compartment.",
+      "description": "Sleek matte black roll-top design engineered for modern city commuters. Features high-density water-repellent exterior, ergonomic breathable back padding, hidden anti-theft rear pocket, and dedicated shockproof laptop compartment.",
+      "price": 1950,
+      "cost_price": 1950,
+      "original_price": 2800,
+      "stock_quantity": 25,
+      "low_stock_threshold": 5,
+      "specifications": {
+        "supplier": "Mohasagor",
+        "supplier_id": "MS-8804",
+        "original_url": "https://dregital.mohasagor.com/product/minimalist-rolltop-backpack",
+        "warranty": "1 Year Brand Warranty"
+      },
+      "image_url": "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8804_0_1795255739493.jpg",
+      "images": [
+        "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8804_0_1795255739493.jpg",
+        "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8804_1_1795255739977.jpg"
+      ],
+      "is_active": true,
+      "is_featured": true,
+      "is_bestseller": true,
+      "rating_average": 4.9,
+      "rating_count": 8,
+      "created_at": "2026-11-21T10:09:00.365Z",
+      "updated_at": "2026-11-21T10:09:00.365Z"
+    },
+    {
+      "id": "prod-moh-ms-8805",
+      "category_id": "cat-tech-001",
+      "name": "Keychron K3 Ultra-Slim Wireless Mechanical Keyboard",
+      "slug": "keychron-k3-ultra-slim-wireless-mechanical-keyboard",
+      "sku": "MOH-KEY-K3V2",
+      "short_description": "Low profile optical hot-swappable switches with white LED backlight for Mac and Windows.",
+      "description": "World-renowned ultra-slim wireless mechanical keyboard featuring low-profile optical switches. Connects with up to 3 devices via Bluetooth 5.1 or Type-C wired mode. Compatible with both macOS and Windows layouts.",
+      "price": 6800,
+      "cost_price": 6800,
+      "original_price": 8500,
+      "stock_quantity": 25,
+      "low_stock_threshold": 5,
+      "specifications": {
+        "supplier": "Mohasagor",
+        "supplier_id": "MS-8805",
+        "original_url": "https://dregital.mohasagor.com/product/keychron-k3-wireless-keyboard",
+        "warranty": "1 Year Brand Warranty"
+      },
+      "image_url": "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8805_0_1795255740443.jpg",
+      "images": [
+        "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8805_0_1795255740443.jpg",
+        "https://gdsmcwwewgtdqqhgxkpu.supabase.co/storage/v1/object/public/image/products/mohasagor/MS-8805_1_1795255740979.jpg"
+      ],
+      "is_active": true,
+      "is_featured": true,
+      "is_bestseller": true,
+      "rating_average": 4.9,
+      "rating_count": 8,
+      "created_at": "2026-11-21T10:09:01.360Z",
+      "updated_at": "2026-11-21T10:09:01.360Z"
+    }
+  ],
+  "settings": {
+    "general": {
+      "address": "House J/5, Kazi Nuzrul Islam Rd, Mohammedpur, Dhaka-1207, Bangladesh",
+      "hotline": "01880644806",
+      "contact_email": "dregital.shop@gmail.com",
+      "contact_phone": "+880 1880644806",
+      "announcement_bar": "",
+      "announcement_enabled": true
+    },
+    "shipping": {
+      "inside_dhaka_charge": 60,
+      "outside_dhaka_charge": 120,
+      "free_shipping_threshold": 3000
+    },
+    "store_name": "Dregital",
+    "order_prefix": "DRG",
+    "contact_email": "support@dregital.com",
+    "contact_phone": "+880 1711 000000",
+    "store_tagline": "Modern Shopping Destination",
+    "currency_symbol": "৳",
+    "free_shipping_threshold": 5000
+  },
+  "categories": [
+    {
+      "id": "cat-tech-001",
+      "name": "Tech",
+      "slug": "tech",
+      "icon_name": "Laptop",
+      "image_url": "/icons/categories/tech.svg",
+      "is_active": true,
+      "parent_id": null,
+      "description": "Cutting-edge audio gear, wearable technology, computing devices & daily gadgets.",
+      "is_featured": true,
+      "display_order": 1
+    },
+    {
+      "id": "cat-food-002",
+      "name": "Food",
+      "slug": "food",
+      "icon_name": "Utensils",
+      "image_url": "/icons/categories/food.svg",
+      "is_active": true,
+      "parent_id": null,
+      "description": "Artisanal provisions, organic pantry essentials, gourmet coffee & treats.",
+      "is_featured": true,
+      "display_order": 2
+    },
+    {
+      "id": "cat-clothing-003",
+      "name": "Clothing",
+      "slug": "clothing",
+      "icon_name": "Shirt",
+      "image_url": "/icons/categories/clothing.svg",
+      "is_active": true,
+      "parent_id": null,
+      "description": "Contemporary minimalist apparel, premium everyday wear & outerwear.",
+      "is_featured": true,
+      "display_order": 3
+    },
+    {
+      "id": "cat-kids-004",
+      "name": "Kids",
+      "slug": "kids",
+      "icon_name": "Smile",
+      "image_url": "/icons/categories/kids.svg",
+      "is_active": true,
+      "parent_id": null,
+      "description": "Nordic wooden toys, developmental activity sets & organic essentials.",
+      "is_featured": true,
+      "display_order": 4
+    },
+    {
+      "id": "cat-home-005",
+      "name": "Home",
+      "slug": "home",
+      "icon_name": "Home",
+      "image_url": "/icons/categories/home.svg",
+      "is_active": true,
+      "parent_id": null,
+      "description": "Modern ceramic decor, ambient lighting, kitchenware & living accents.",
+      "is_featured": true,
+      "display_order": 5
+    },
+    {
+      "id": "cat-other-006",
+      "name": "Other",
+      "slug": "other",
+      "icon_name": "Package",
+      "image_url": "/icons/categories/other.svg",
+      "is_active": true,
+      "parent_id": null,
+      "description": "Full-grain leather goods, desk accessories & curated lifestyle gear.",
+      "is_featured": true,
+      "display_order": 6
     }
   ],
   "deliveryZones": [
@@ -597,71 +406,16 @@
       "id": "dz-inside-dhaka",
       "name": "Inside Dhaka",
       "charge": 70,
-      "estimated_days": "24-48 Hours",
-      "is_active": true
+      "is_active": true,
+      "estimated_days": "24-48 Hours"
     },
     {
       "id": "dz-outside-dhaka",
       "name": "Outside Dhaka",
       "charge": 130,
-      "estimated_days": "2-4 Days",
-      "is_active": true
+      "is_active": true,
+      "estimated_days": "2-4 Days"
     }
   ],
-  "orders": [],
-  "pages": [
-    {
-      "id": "page-about",
-      "title": "About Dregital",
-      "slug": "about-us",
-      "content": "Dregital is an independent modern retail and e-commerce platform in Bangladesh offering genuine tech, food, clothing, kids, and home goods with nationwide delivery."
-    },
-    {
-      "id": "page-terms",
-      "title": "Terms & Conditions",
-      "slug": "terms-and-conditions",
-      "content": "Welcome to Dregital. By using our website and placing orders, you agree to comply with our store terms and purchasing conditions."
-    },
-    {
-      "id": "page-privacy",
-      "title": "Privacy Policy",
-      "slug": "privacy-policy",
-      "content": "Your privacy is paramount. We safeguard all personal data, shipping details, and transaction information in accordance with international security best practices."
-    },
-    {
-      "id": "page-shipping",
-      "title": "Shipping Policy",
-      "slug": "shipping-policy",
-      "content": "We deliver nationwide across all 64 districts in Bangladesh with reliable courier partners. Inside Dhaka: 24-48 Hours. Outside Dhaka: 2-4 Days."
-    },
-    {
-      "id": "page-refund",
-      "title": "Refund & Return Policy",
-      "slug": "refund-policy",
-      "content": "We offer an easy 7-day replacement warranty for verified manufacturing defects. Please contact support with your order number."
-    }
-  ],
-  "settings": {
-    "store_name": "Dregital",
-    "store_tagline": "Modern Shopping Destination",
-    "contact_phone": "+880 1711 000000",
-    "contact_email": "support@dregital.com",
-    "free_shipping_threshold": 5000,
-    "currency_symbol": "৳",
-    "order_prefix": "DRG",
-    "general": {
-      "announcement_bar": "",
-      "announcement_enabled": true,
-      "contact_phone": "+880 1880644806",
-      "hotline": "01880644806",
-      "contact_email": "dregital.shop@gmail.com",
-      "address": "House J/5, Kazi Nuzrul Islam Rd, Mohammedpur, Dhaka-1207, Bangladesh"
-    },
-    "shipping": {
-      "inside_dhaka_charge": 60,
-      "outside_dhaka_charge": 120,
-      "free_shipping_threshold": 3000
-    }
-  },
   "contactMessages": []
 }

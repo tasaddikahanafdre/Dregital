@@ -11,11 +11,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/icon.png', type: 'image/png', sizes: '192x192' },
       { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
     ],
-    shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    shortcut: '/favicon.ico',
+    apple: '/icon.png',
   },
   description: 'Shop authentic technology, computer accessories, ANC headphones, TWS earbuds, GaN fast chargers, smart devices and daily tech essentials in Bangladesh with cash on delivery.',
   keywords: 'Dregital, Bangladesh ecommerce, gadgets, tech shop Dhaka, computer accessories, earbuds, smart watch',

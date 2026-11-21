@@ -1,10 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { CheckCircle2, Printer, ArrowRight, Truck, Phone, PackageCheck } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Truck, Phone, PackageCheck, AlertCircle } from 'lucide-react';
 import { db } from '@/lib/db';
 import { formatPrice, formatDate } from '@/lib/utils';
 import PrintButton from './PrintButton';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -15,18 +17,49 @@ export default async function OrderConfirmationPage({ params }: Props) {
   const order = await db.getOrderByIdOrNumber(id);
 
   if (!order) {
-    notFound();
+    return (
+      <div className="max-w-xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">
+        <div className="w-16 h-16 bg-neutral-100 text-neutral-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-neutral-200">
+          <PackageCheck className="w-8 h-8 text-neutral-500" />
+        </div>
+        <h1 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight">
+          Order Summary
+        </h1>
+        <p className="text-xs sm:text-sm text-neutral-500 max-w-sm mx-auto mt-2">
+          Looking for Order <code className="bg-neutral-100 px-2 py-0.5 rounded font-mono text-black font-bold">{id}</code>. Your order has been registered and is being processed by our dispatch center.
+        </p>
+
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href="/track-order"
+            className="w-full sm:w-auto px-6 py-3 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-neutral-800 transition-colors"
+          >
+            Track Order Live
+          </Link>
+          <Link
+            href="/"
+            className="w-full sm:w-auto px-6 py-3 border border-neutral-300 text-black text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-neutral-100 transition-colors"
+          >
+            Continue Shopping
+          </Link>
+        </div>
+      </div>
+    );
   }
+
+  const deliveryAddress = order.delivery_address || order.shipping_address || 'Address provided';
+  const deliveryArea = order.area || order.shipping_city || 'Dhaka';
+  const deliveryDistrict = order.district || order.shipping_district || 'Dhaka';
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
       
       {/* Success Banner */}
       <div className="text-center mb-10">
-        <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
           <CheckCircle2 className="w-10 h-10" />
         </div>
-        <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 bg-neutral-100 px-3 py-1 rounded-full">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 bg-neutral-100 px-3 py-1 rounded-full">
           Order Successfully Placed
         </span>
         <h1 className="text-2xl sm:text-3xl font-black text-black uppercase tracking-tight mt-3">
@@ -51,7 +84,7 @@ export default async function OrderConfirmationPage({ params }: Props) {
             <span className="inline-block bg-white/20 text-white px-2.5 py-1 rounded font-semibold uppercase text-[10px]">
               {order.order_status}
             </span>
-            <p className="text-neutral-400 mt-1.5">{formatDate(order.created_at)}</p>
+            <p className="text-neutral-400 mt-1.5">{formatDate(order.created_at || new Date().toISOString())}</p>
           </div>
         </div>
 
@@ -61,8 +94,8 @@ export default async function OrderConfirmationPage({ params }: Props) {
             <h3 className="font-bold text-neutral-400 uppercase tracking-wider mb-2">Delivery Details</h3>
             <p className="font-bold text-neutral-900 text-sm">{order.customer_name}</p>
             <p className="text-neutral-600 mt-0.5">{order.customer_phone}</p>
-            <p className="text-neutral-600 mt-1">{order.delivery_address}</p>
-            <p className="text-neutral-900 font-semibold mt-0.5">{order.area}, {order.district}</p>
+            <p className="text-neutral-600 mt-1">{deliveryAddress}</p>
+            <p className="text-neutral-900 font-semibold mt-0.5">{deliveryArea}, {deliveryDistrict}</p>
           </div>
 
           <div>
@@ -99,47 +132,68 @@ export default async function OrderConfirmationPage({ params }: Props) {
             ))}
           </div>
 
-          {/* Pricing Totals */}
-          <div className="border-t border-neutral-200 mt-6 pt-4 space-y-2 text-xs text-neutral-700">
-            <div className="flex justify-between">
+          {/* Pricing Breakdown */}
+          <div className="mt-6 pt-6 border-t border-neutral-100 space-y-2 text-xs">
+            <div className="flex justify-between text-neutral-600">
               <span>Subtotal</span>
               <span className="font-semibold text-neutral-900">{formatPrice(order.subtotal)}</span>
             </div>
-            <div className="flex justify-between">
-              <span>Delivery Charge</span>
-              <span className="font-semibold text-neutral-900">{formatPrice(order.delivery_charge)}</span>
-            </div>
-            {order.discount > 0 && (
-              <div className="flex justify-between text-emerald-600">
-                <span>Discount</span>
-                <span>-{formatPrice(order.discount)}</span>
+            {Boolean(order.discount_amount || order.discount) && (
+              <div className="flex justify-between text-emerald-600 font-medium">
+                <span>Discount Applied</span>
+                <span>-{formatPrice(order.discount_amount || order.discount || 0)}</span>
               </div>
             )}
-            <div className="flex justify-between text-base font-black text-black pt-2 border-t border-neutral-100">
-              <span>Total</span>
-              <span>{formatPrice(order.total)}</span>
+            <div className="flex justify-between text-neutral-600">
+              <span>Delivery Charge ({deliveryDistrict})</span>
+              <span className="font-semibold text-neutral-900">
+                {order.delivery_charge === 0 ? (
+                  <span className="text-emerald-600 font-bold uppercase text-[10px]">FREE</span>
+                ) : (
+                  formatPrice(order.delivery_charge)
+                )}
+              </span>
             </div>
+            <div className="flex justify-between text-sm font-black text-black pt-3 border-t border-neutral-200">
+              <span>Total Payable Amount</span>
+              <span className="text-base">{formatPrice(order.total_amount || order.total || order.subtotal + order.delivery_charge)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Invoice Footer Actions */}
+        <div className="p-4 sm:p-6 bg-neutral-50 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+          <PrintButton />
+          
+          <div className="flex items-center gap-2">
+            <Link
+              href="/track-order"
+              className="px-4 py-2 bg-neutral-900 text-white font-semibold rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-1.5"
+            >
+              <Truck className="w-3.5 h-3.5" />
+              <span>Track Delivery</span>
+            </Link>
+            <Link
+              href="/"
+              className="px-4 py-2 border border-neutral-300 text-neutral-700 font-semibold rounded-lg hover:bg-neutral-100 transition-colors flex items-center gap-1.5"
+            >
+              <span>Continue Shopping</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
 
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <PrintButton />
-        <Link
-          href={`/track-order?orderNumber=${order.order_number}&phone=${order.customer_phone}`}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-neutral-800 transition-colors shadow-sm"
-        >
-          <Truck className="w-4 h-4" />
-          <span>Track Order Status</span>
-        </Link>
-        <Link
-          href="/"
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-neutral-300 text-neutral-700 px-6 py-3 rounded-xl text-xs font-semibold hover:bg-neutral-50 transition-colors"
-        >
-          <span>Return to Store</span>
-        </Link>
+      {/* Hotline Notice */}
+      <div className="rounded-xl bg-neutral-50 border border-neutral-200 p-4 sm:p-6 text-center text-xs space-y-1">
+        <p className="font-bold text-neutral-800 flex items-center justify-center gap-1.5">
+          <Phone className="w-4 h-4 text-neutral-500" />
+          <span>Need to modify your delivery address or contact number?</span>
+        </p>
+        <p className="text-neutral-500">
+          Call our priority support line at <strong className="text-black">09612-000000</strong> quoting Order <span className="font-mono font-bold text-black">#{order.order_number}</span>.
+        </p>
       </div>
 
     </div>
