@@ -18,7 +18,11 @@ import {
   Lock,
   Image as ImageIcon,
   DownloadCloud,
-  Sparkles
+  Sparkles,
+  BarChart3,
+  Ticket,
+  Flame,
+  Globe
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -86,7 +90,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Featured Items', href: '/admin/featured', icon: Sparkles },
+    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+    { name: 'Featured (3×3 & Nav)', href: '/admin/featured', icon: Sparkles },
+    { name: 'Coupons & Discounts', href: '/admin/coupons', icon: Ticket },
+    { name: 'Deal Page Maker', href: '/admin/deals', icon: Flame },
+    { name: 'SEO Manager', href: '/admin/seo', icon: Globe },
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Product Importer', href: '/admin/importer', icon: DownloadCloud },
     { name: 'Categories', href: '/admin/categories', icon: FolderTree },

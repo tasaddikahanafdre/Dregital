@@ -188,4 +188,95 @@ export interface CartItem {
   product: Product;
   quantity: number;
   variant?: ProductVariant | null;
+  selected_options?: Record<string, string>;
+  deal_info?: {
+    deal_id: string;
+    deal_slug: string;
+    deal_title: string;
+    deal_price: number;
+    original_price: number;
+    discount_text: string;
+  };
+}
+
+// 1. DISCOUNT & COUPONS
+export interface Coupon {
+  id: string;
+  code: string; // e.g. "EID2026", "SAVE10"
+  description?: string;
+  discount_type: 'percentage' | 'fixed'; // percentage (%) or fixed BDT (৳)
+  discount_value: number; // e.g. 15 or 250
+  min_order_amount?: number; // minimum subtotal required
+  max_discount_amount?: number | null; // maximum discount cap for percentage
+  start_date?: string | null;
+  end_date?: string | null;
+  max_uses?: number | null; // total usage cap
+  used_count: number;
+  is_active: boolean;
+  applicable_category_ids?: string[]; // category restrictions
+  applicable_product_ids?: string[]; // product restrictions
+  created_at: string;
+  updated_at?: string;
+}
+
+// 2. DEAL PAGE MAKER
+export interface DealProduct {
+  product_id: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number; // e.g. 20 (percent) or 300 (BDT)
+  deal_price: number; // calculated promotional price
+  display_order?: number;
+}
+
+export interface DealPage {
+  id: string;
+  title: string;
+  slug: string; // e.g. "flash-sale", "weekend-deals"
+  subtitle?: string | null;
+  description?: string | null;
+  banner_url?: string | null;
+  bg_color?: string | null;
+  text_color?: string | null;
+  badge_text?: string | null; // e.g. "LIMITED TIME DEAL"
+  start_date?: string | null;
+  end_date?: string | null;
+  is_active: boolean;
+  products: DealProduct[];
+  created_at: string;
+  updated_at?: string;
+}
+
+// 3. SEO MANAGEMENT
+export interface SEOMetadata {
+  meta_title?: string;
+  meta_description?: string;
+  keywords?: string;
+  canonical_url?: string;
+  og_title?: string;
+  og_description?: string;
+  og_image?: string;
+  image_alt?: string;
+}
+
+export interface GlobalSEOSettings {
+  site_title_default: string;
+  site_title_template: string; // e.g. "%s | Dregital"
+  meta_description: string;
+  keywords: string;
+  canonical_base_url: string; // https://dregital.shop
+  og_image: string;
+  robots_indexing: boolean;
+  custom_header_tags?: string;
+  entity_overrides?: Record<string, SEOMetadata>; // key: 'prod:xyz', 'cat:xyz', 'page:slug'
+}
+
+// 4. ANALYTICS & EXPENSES
+export interface ExpenseRecord {
+  id: string;
+  title: string;
+  amount: number;
+  category: 'packaging' | 'courier_extra' | 'marketing' | 'software' | 'inventory' | 'other';
+  date: string;
+  notes?: string;
+  created_at?: string;
 }

@@ -32,6 +32,18 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState('');
   const [paymentMethod] = useState<'Cash on Delivery'>('Cash on Delivery');
 
+  // Coupon state
+  const [couponInput, setCouponInput] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    coupon_id: string;
+    code: string;
+    discount_amount: number;
+    discount_type: string;
+    discount_value: number;
+  } | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -45,11 +57,56 @@ export default function CheckoutPage() {
     }
   }, [district]);
 
-  // Calculate delivery charge
+  // Handle Apply Coupon
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponInput.trim()) return;
+    setCouponLoading(true);
+    setCouponError('');
+
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: couponInput.trim(),
+          subtotal: cartSubtotal,
+          items: cart
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.valid) {
+        setCouponError(data.message || 'Invalid coupon code');
+        setAppliedCoupon(null);
+      } else {
+        setAppliedCoupon({
+          coupon_id: data.coupon_id,
+          code: data.code,
+          discount_amount: data.discount_amount,
+          discount_type: data.discount_type,
+          discount_value: data.discount_value
+        });
+        setCouponInput('');
+        setCouponError('');
+      }
+    } catch {
+      setCouponError('Network error checking coupon');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError('');
+  };
+
+  // Calculate delivery charge & totals
   const isDhaka = selectedDistrictData.isDhaka;
   const isFreeDhakaShipping = isDhaka && cartSubtotal >= 3000;
   const deliveryCharge = isFreeDhakaShipping ? 0 : (isDhaka ? 60 : 120);
-  const finalTotal = cartSubtotal + deliveryCharge;
+  const discountTotal = appliedCoupon ? appliedCoupon.discount_amount : 0;
+  const finalTotal = Math.max(0, cartSubtotal - discountTotal) + deliveryCharge;
 
   if (cart.length === 0) {
     return (
@@ -97,17 +154,29 @@ export default function CheckoutPage() {
         payment_method: paymentMethod,
         payment_status: paymentMethod === 'Cash on Delivery' ? 'Pending' : 'Pending',
         delivery_charge: deliveryCharge,
-        items: cart.map(item => ({
-          product_id: item.product.id,
-          product_name: item.product.name,
-          product_price: item.product.price,
-          quantity: item.quantity,
-          product_sku: item.product.sku,
-          variant_details: item.selected_options && Object.keys(item.selected_options).length > 0
+        subtotal: cartSubtotal,
+        discount_amount: discountTotal,
+        total_amount: finalTotal,
+        coupon_code: appliedCoupon ? appliedCoupon.code : null,
+        items: cart.map(item => {
+          const unitPrice = item.deal_info?.deal_price ?? item.product.price;
+          const optionsText = item.selected_options && Object.keys(item.selected_options).length > 0
             ? Object.entries(item.selected_options).map(([k, v]) => `${k}: ${v}`).join(', ')
-            : (item.variant ? `${item.variant.variant_name}: ${item.variant.variant_value}` : null),
-          image_url: item.product.image_url
-        }))
+            : (item.variant ? `${item.variant.variant_name}: ${item.variant.variant_value}` : null);
+          const dealNote = item.deal_info ? `[Deal: ${item.deal_info.deal_title}]` : null;
+          const combinedDetails = [dealNote, optionsText].filter(Boolean).join(' | ');
+
+          return {
+            product_id: item.product.id,
+            product_name: item.product.name,
+            product_price: unitPrice,
+            quantity: item.quantity,
+            subtotal: unitPrice * item.quantity,
+            product_sku: item.product.sku,
+            variant_details: combinedDetails || null,
+            image_url: item.product.image_url
+          };
+        })
       };
 
       const res = await fetch('/api/orders', {
@@ -330,22 +399,90 @@ export default function CheckoutPage() {
 
             {/* Items preview */}
             <div className="space-y-3 max-h-60 overflow-y-auto pr-1 divide-y divide-neutral-200 text-xs">
-              {cart.map((item) => (
-                <div key={item.id} className="pt-2.5 first:pt-0 flex items-center justify-between gap-3">
-                  <img
-                    src={item.product.image_url || 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=80'}
-                    alt={item.product.name}
-                    className="w-10 h-10 object-cover rounded border border-neutral-200 shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-neutral-900 truncate">{item.product.name}</p>
-                    <p className="text-[11px] text-neutral-500">Qty: {item.quantity} × {formatPrice(item.product.price)}</p>
+              {cart.map((item) => {
+                const unitPrice = item.deal_info?.deal_price ?? item.product.price;
+                const isDeal = Boolean(item.deal_info);
+
+                return (
+                  <div key={item.id} className="pt-2.5 first:pt-0 flex items-center justify-between gap-3">
+                    <img
+                      src={item.product.image_url || 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=80'}
+                      alt={item.product.name}
+                      className="w-10 h-10 object-cover rounded border border-neutral-200 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-semibold text-neutral-900 truncate">{item.product.name}</p>
+                      </div>
+                      {isDeal && (
+                        <span className="inline-block text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 rounded px-1.5 py-0.2 my-0.5">
+                          {item.deal_info?.discount_text || 'Deal Price'}
+                        </span>
+                      )}
+                      <p className="text-[11px] text-neutral-500">
+                        Qty: {item.quantity} × {formatPrice(unitPrice)}
+                        {isDeal && (
+                          <span className="line-through text-neutral-400 ml-1.5">
+                            {formatPrice(item.product.price)}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <span className="font-bold text-neutral-900 shrink-0">
+                      {formatPrice(unitPrice * item.quantity)}
+                    </span>
                   </div>
-                  <span className="font-bold text-neutral-900 shrink-0">
-                    {formatPrice(item.product.price * item.quantity)}
-                  </span>
+                );
+              })}
+            </div>
+
+            {/* Coupon Code Section */}
+            <div className="border-t border-neutral-200 pt-3">
+              {appliedCoupon ? (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center justify-between text-xs">
+                  <div>
+                    <div className="flex items-center gap-1.5 font-bold text-emerald-900">
+                      <span>Coupon: {appliedCoupon.code}</span>
+                      <span className="bg-emerald-200 text-emerald-900 text-[10px] px-1.5 py-0.2 rounded font-black">
+                        -{appliedCoupon.discount_type === 'percentage' ? `${appliedCoupon.discount_value}%` : `৳${appliedCoupon.discount_value}`}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-emerald-700 mt-0.5">
+                      Discount applied: {formatPrice(appliedCoupon.discount_amount)}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveCoupon}
+                    className="text-xs font-semibold text-red-600 hover:text-red-800 underline"
+                  >
+                    Remove
+                  </button>
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-1.5">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Coupon / Promo code"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      className="flex-1 text-xs px-3 py-2 bg-white border border-neutral-300 rounded-lg placeholder:text-neutral-400 uppercase font-mono tracking-wider focus:outline-none focus:border-black"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading || !couponInput.trim()}
+                      className="px-4 py-2 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-neutral-800 disabled:opacity-40 transition-colors shrink-0"
+                    >
+                      {couponLoading ? '...' : 'Apply'}
+                    </button>
+                  </div>
+                  {couponError && (
+                    <p className="text-[11px] text-red-600 font-medium">{couponError}</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Price Calculations */}
@@ -354,6 +491,12 @@ export default function CheckoutPage() {
                 <span>Subtotal</span>
                 <span className="font-semibold text-black">{formatPrice(cartSubtotal)}</span>
               </div>
+              {appliedCoupon && (
+                <div className="flex justify-between text-emerald-700 font-bold">
+                  <span>Coupon Discount ({appliedCoupon.code})</span>
+                  <span>- {formatPrice(appliedCoupon.discount_amount)}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span>Delivery Charge ({district})</span>
                 <span className="font-semibold text-black">

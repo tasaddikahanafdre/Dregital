@@ -4,11 +4,19 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, ProductVariant } from './types';
 
 export interface CartItem {
-  id: string; // unique item id (composite of product.id + variant?.id + options)
+  id: string; // unique item id (composite of product.id + variant?.id + options + deal)
   product: Product;
   quantity: number;
   variant?: ProductVariant | null;
   selected_options?: Record<string, string>;
+  deal_info?: {
+    deal_id: string;
+    deal_slug: string;
+    deal_title: string;
+    deal_price: number;
+    original_price: number;
+    discount_text: string;
+  };
 }
 
 interface CartContextType {
@@ -17,7 +25,8 @@ interface CartContextType {
     product: Product, 
     quantity?: number, 
     variant?: ProductVariant | null, 
-    selectedOptions?: Record<string, string>
+    selectedOptions?: Record<string, string>,
+    dealInfo?: CartItem['deal_info']
   ) => void;
   removeFromCart: (cartItemId: string) => void;
   updateQuantity: (cartItemId: string, quantity: number) => void;
@@ -68,12 +77,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     product: Product, 
     quantity = 1, 
     variant: ProductVariant | null = null,
-    selectedOptions?: Record<string, string>
+    selectedOptions?: Record<string, string>,
+    dealInfo?: CartItem['deal_info']
   ) => {
     const optionsKey = selectedOptions && Object.keys(selectedOptions).length > 0
       ? Object.entries(selectedOptions).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `${k}:${v}`).join('|')
       : '';
-    const itemId = `${product.id}${variant ? `-${variant.id}` : ''}${optionsKey ? `-${optionsKey}` : ''}`;
+    const dealKey = dealInfo ? `-deal-${dealInfo.deal_id}` : '';
+    const itemId = `${product.id}${variant ? `-${variant.id}` : ''}${optionsKey ? `-${optionsKey}` : ''}${dealKey}`;
 
     setCart(prev => {
       const existing = prev.find(item => item.id === itemId);
@@ -81,7 +92,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const newQty = existing.quantity + quantity;
         return prev.map(item => item.id === itemId ? { ...item, quantity: newQty } : item);
       }
-      return [...prev, { id: itemId, product, quantity, variant, selected_options: selectedOptions }];
+      return [...prev, { id: itemId, product, quantity, variant, selected_options: selectedOptions, deal_info: dealInfo }];
     });
 
     setIsCartOpen(true);
@@ -104,7 +115,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const cartSubtotal = cart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+  const cartSubtotal = cart.reduce((total, item) => {
+    const unitPrice = item.deal_info?.deal_price ?? item.product.price;
+    return total + (unitPrice * item.quantity);
+  }, 0);
   const freeShippingProgress = Math.min(100, Math.round((cartSubtotal / freeShippingThreshold) * 100));
   const amountUntilFreeShipping = Math.max(0, freeShippingThreshold - cartSubtotal);
 

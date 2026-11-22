@@ -44,8 +44,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const products = await db.getProducts();
-    const productRoutes: MetadataRoute.Sitemap = (products || []).map((p) => ({
+    const productsResult = await db.getProducts({ limit: 1000 });
+    const products = Array.isArray(productsResult) ? productsResult : (productsResult?.products || []);
+    const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
       url: `${baseUrl}/product/${p.slug}`,
       lastModified: new Date(p.created_at || Date.now()),
       changeFrequency: 'weekly',
@@ -60,7 +61,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-    return [...staticRoutes, ...productRoutes, ...categoryRoutes];
+    const dealPages = await db.getDealPages(false);
+    const dealRoutes: MetadataRoute.Sitemap = (dealPages || []).map((d) => ({
+      url: `${baseUrl}/deal/${d.slug}`,
+      lastModified: new Date(d.created_at || Date.now()),
+      changeFrequency: 'daily',
+      priority: 0.85,
+    }));
+
+    return [...staticRoutes, ...productRoutes, ...categoryRoutes, ...dealRoutes];
   } catch {
     return staticRoutes;
   }

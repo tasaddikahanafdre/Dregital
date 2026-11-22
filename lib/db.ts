@@ -1,7 +1,21 @@
 import fs from 'fs';
 import path from 'path';
 import { getSupabaseAdminClient } from './supabase';
-import { Product, Category, Order, Banner, StoreSetting, PageContent, DeliveryZone, ContactMessage } from './types';
+import { 
+  Product, 
+  Category, 
+  Order, 
+  Banner, 
+  StoreSetting, 
+  PageContent, 
+  DeliveryZone, 
+  ContactMessage,
+  Coupon,
+  DealPage,
+  GlobalSEOSettings,
+  ExpenseRecord,
+  SEOMetadata
+} from './types';
 import { getCategoryIconUrl, matchCategoryIcon } from './categoryIcons';
 
 // Local persistence file path
@@ -18,11 +32,72 @@ interface InitialData {
   contactMessages: ContactMessage[];
   featured_product_ids?: string[];
   featured_category_ids?: string[];
+  coupons?: Coupon[];
+  deal_pages?: DealPage[];
+  seo_settings?: GlobalSEOSettings;
+  expenses?: ExpenseRecord[];
 }
+
+const defaultSEOSettings: GlobalSEOSettings = {
+  site_title_default: 'Dregital — Modern Retail & Tech Essentials in Bangladesh',
+  site_title_template: '%s | Dregital',
+  meta_description: 'Shop authentic technology, computer accessories, audio gear, smart watches, fashion and daily essentials in Bangladesh with cash on delivery and fast nationwide delivery.',
+  keywords: 'Dregital, Bangladesh ecommerce, gadgets, tech shop Dhaka, smart watch, earbuds, computer accessories',
+  canonical_base_url: 'https://dregital.shop',
+  og_image: '/banner/banner.png',
+  robots_indexing: true,
+  entity_overrides: {}
+};
 
 const defaultDataset: InitialData = {
   featured_product_ids: [],
   featured_category_ids: ['cat-tech-001', 'cat-food-002', 'cat-clothing-003', 'cat-kids-004', 'cat-home-005', 'cat-other-006'],
+  coupons: [
+    {
+      id: 'cpn-welcome-10',
+      code: 'WELCOME10',
+      description: '10% off for first-time shoppers on orders over ৳1,000',
+      discount_type: 'percentage',
+      discount_value: 10,
+      min_order_amount: 1000,
+      max_discount_amount: 500,
+      max_uses: 1000,
+      used_count: 0,
+      is_active: true,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'cpn-save-200',
+      code: 'DREGITAL200',
+      description: 'Flat ৳200 discount on orders above ৳2,500',
+      discount_type: 'fixed',
+      discount_value: 200,
+      min_order_amount: 2500,
+      max_discount_amount: null,
+      max_uses: 500,
+      used_count: 0,
+      is_active: true,
+      created_at: new Date().toISOString()
+    }
+  ],
+  deal_pages: [
+    {
+      id: 'deal-flash-sale-01',
+      title: 'Mega Flash Sale 2026',
+      slug: 'flash-sale',
+      subtitle: 'Exclusive discounts available only through this official deal page',
+      description: 'Limited-time special prices on curated smart watches, luxury jewelry and tech gadgets. Order now before promotional stock runs out!',
+      badge_text: 'LIMITED TIME FLASH SALE',
+      banner_url: '/banner/banner.png',
+      bg_color: '#000000',
+      text_color: '#FFFFFF',
+      is_active: true,
+      products: [],
+      created_at: new Date().toISOString()
+    }
+  ],
+  seo_settings: defaultSEOSettings,
+  expenses: [],
   categories: [
     {
       id: 'cat-tech-001',
@@ -191,6 +266,10 @@ function loadData(): InitialData {
         featured_category_ids: Array.isArray(parsed.featured_category_ids)
           ? parsed.featured_category_ids
           : (Array.isArray(parsed.settings?.featured_category_ids) ? parsed.settings.featured_category_ids : defaultDataset.featured_category_ids),
+        coupons: Array.isArray(parsed.coupons) ? parsed.coupons : defaultDataset.coupons || [],
+        deal_pages: Array.isArray(parsed.deal_pages) ? parsed.deal_pages : defaultDataset.deal_pages || [],
+        seo_settings: parsed.seo_settings && typeof parsed.seo_settings === 'object' ? { ...defaultSEOSettings, ...parsed.seo_settings } : defaultSEOSettings,
+        expenses: Array.isArray(parsed.expenses) ? parsed.expenses : [],
       };
     } catch (e) {
       console.error('Error reading local data file, falling back to clean dataset', e);
@@ -247,6 +326,10 @@ async function loadDataAsync(): Promise<InitialData> {
           featured_category_ids: Array.isArray(cloudData.featured_category_ids)
             ? cloudData.featured_category_ids
             : (Array.isArray(cloudData.settings?.featured_category_ids) ? cloudData.settings.featured_category_ids : defaultDataset.featured_category_ids),
+          coupons: Array.isArray(cloudData.coupons) ? cloudData.coupons : defaultDataset.coupons || [],
+          deal_pages: Array.isArray(cloudData.deal_pages) ? cloudData.deal_pages : defaultDataset.deal_pages || [],
+          seo_settings: cloudData.seo_settings && typeof cloudData.seo_settings === 'object' ? { ...defaultSEOSettings, ...cloudData.seo_settings } : defaultSEOSettings,
+          expenses: Array.isArray(cloudData.expenses) ? cloudData.expenses : [],
         };
         lastCloudFetchTime = now;
         return cachedStoreData;
@@ -692,6 +775,15 @@ export const db = {
       }
     }
 
+    // Increment coupon usage count if coupon applied
+    const couponCode = (orderData as any).coupon_code;
+    if (couponCode && typeof couponCode === 'string') {
+      const cpn = (store.coupons || []).find(c => c.code.toUpperCase() === couponCode.trim().toUpperCase());
+      if (cpn) {
+        cpn.used_count = (cpn.used_count || 0) + 1;
+      }
+    }
+
     store.orders.unshift(newOrder);
     await saveDataAsync(store);
     return newOrder;
@@ -883,5 +975,233 @@ export const db = {
 
     await saveDataAsync(store);
     return this.getHeaderFeaturedCategories();
+  },
+
+  // --- 1. DISCOUNT & COUPONS ---
+  async getCoupons(): Promise<Coupon[]> {
+    const store = await loadDataAsync();
+    return store.coupons || [];
+  },
+
+  async getCouponByCode(code: string): Promise<Coupon | null> {
+    const store = await loadDataAsync();
+    const clean = code.trim().toUpperCase();
+    return (store.coupons || []).find(c => c.code.toUpperCase() === clean) || null;
+  },
+
+  async createCoupon(data: Partial<Coupon>): Promise<Coupon> {
+    const store = await loadDataAsync();
+    const id = `cpn-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const newCoupon: Coupon = {
+      id,
+      code: (data.code || `PROMO${Math.floor(Math.random() * 900 + 100)}`).trim().toUpperCase(),
+      description: data.description || '',
+      discount_type: data.discount_type === 'percentage' ? 'percentage' : 'fixed',
+      discount_value: Number(data.discount_value) || 0,
+      min_order_amount: data.min_order_amount ? Number(data.min_order_amount) : 0,
+      max_discount_amount: data.max_discount_amount ? Number(data.max_discount_amount) : null,
+      start_date: data.start_date || null,
+      end_date: data.end_date || null,
+      max_uses: data.max_uses ? Number(data.max_uses) : null,
+      used_count: 0,
+      is_active: data.is_active !== false,
+      applicable_category_ids: Array.isArray(data.applicable_category_ids) ? data.applicable_category_ids : [],
+      applicable_product_ids: Array.isArray(data.applicable_product_ids) ? data.applicable_product_ids : [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    if (!store.coupons) store.coupons = [];
+    store.coupons.unshift(newCoupon);
+    await saveDataAsync(store);
+    return newCoupon;
+  },
+
+  async updateCoupon(id: string, data: Partial<Coupon>): Promise<Coupon | null> {
+    const store = await loadDataAsync();
+    if (!store.coupons) store.coupons = [];
+    const index = store.coupons.findIndex(c => c.id === id);
+    if (index === -1) return null;
+    const existing = store.coupons[index];
+    const updated: Coupon = {
+      ...existing,
+      ...data,
+      code: data.code ? data.code.trim().toUpperCase() : existing.code,
+      updated_at: new Date().toISOString()
+    };
+    store.coupons[index] = updated;
+    await saveDataAsync(store);
+    return updated;
+  },
+
+  async deleteCoupon(id: string): Promise<boolean> {
+    const store = await loadDataAsync();
+    if (!store.coupons) return false;
+    const initialLen = store.coupons.length;
+    store.coupons = store.coupons.filter(c => c.id !== id);
+    await saveDataAsync(store);
+    return store.coupons.length < initialLen;
+  },
+
+  async incrementCouponUsage(idOrCode: string): Promise<void> {
+    const store = await loadDataAsync();
+    if (!store.coupons) return;
+    const coupon = store.coupons.find(c => c.id === idOrCode || c.code.toUpperCase() === idOrCode.toUpperCase());
+    if (coupon) {
+      coupon.used_count = (coupon.used_count || 0) + 1;
+      coupon.updated_at = new Date().toISOString();
+      await saveDataAsync(store);
+    }
+  },
+
+  // --- 2. DEAL PAGE MAKER ---
+  async getDealPages(includeInactive = true): Promise<DealPage[]> {
+    const store = await loadDataAsync();
+    const list = store.deal_pages || [];
+    if (!includeInactive) {
+      const now = new Date();
+      return list.filter(d => {
+        if (!d.is_active) return false;
+        if (d.start_date && new Date(d.start_date) > now) return false;
+        if (d.end_date && new Date(d.end_date) < now) return false;
+        return true;
+      });
+    }
+    return list;
+  },
+
+  async getDealPageBySlug(slugOrId: string): Promise<DealPage | null> {
+    const store = await loadDataAsync();
+    return (store.deal_pages || []).find(d => d.slug === slugOrId || d.id === slugOrId) || null;
+  },
+
+  async createDealPage(data: Partial<DealPage>): Promise<DealPage> {
+    const store = await loadDataAsync();
+    const id = `deal-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const baseSlug = (data.title || 'deal')
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-');
+    let slug = data.slug?.trim() || baseSlug;
+    if ((store.deal_pages || []).some(d => d.slug === slug)) {
+      slug = `${slug}-${Math.random().toString(36).slice(2, 5)}`;
+    }
+
+    const newDeal: DealPage = {
+      id,
+      title: data.title || 'Special Deal',
+      slug,
+      subtitle: data.subtitle || '',
+      description: data.description || '',
+      banner_url: data.banner_url || '/banner/banner.png',
+      bg_color: data.bg_color || '#000000',
+      text_color: data.text_color || '#FFFFFF',
+      badge_text: data.badge_text || 'EXCLUSIVE DEAL',
+      start_date: data.start_date || null,
+      end_date: data.end_date || null,
+      is_active: data.is_active !== false,
+      products: Array.isArray(data.products) ? data.products : [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    if (!store.deal_pages) store.deal_pages = [];
+    store.deal_pages.unshift(newDeal);
+    await saveDataAsync(store);
+    return newDeal;
+  },
+
+  async updateDealPage(id: string, data: Partial<DealPage>): Promise<DealPage | null> {
+    const store = await loadDataAsync();
+    if (!store.deal_pages) store.deal_pages = [];
+    const index = store.deal_pages.findIndex(d => d.id === id);
+    if (index === -1) return null;
+    const existing = store.deal_pages[index];
+    const updated: DealPage = {
+      ...existing,
+      ...data,
+      products: Array.isArray(data.products) ? data.products : existing.products,
+      updated_at: new Date().toISOString()
+    };
+    store.deal_pages[index] = updated;
+    await saveDataAsync(store);
+    return updated;
+  },
+
+  async deleteDealPage(id: string): Promise<boolean> {
+    const store = await loadDataAsync();
+    if (!store.deal_pages) return false;
+    const initialLen = store.deal_pages.length;
+    store.deal_pages = store.deal_pages.filter(d => d.id !== id);
+    await saveDataAsync(store);
+    return store.deal_pages.length < initialLen;
+  },
+
+  // --- 3. SEO MANAGEMENT ---
+  async getSEOSettings(): Promise<GlobalSEOSettings> {
+    const store = await loadDataAsync();
+    return store.seo_settings || defaultSEOSettings;
+  },
+
+  async updateSEOSettings(settings: Partial<GlobalSEOSettings>): Promise<GlobalSEOSettings> {
+    const store = await loadDataAsync();
+    const current = store.seo_settings || defaultSEOSettings;
+    store.seo_settings = {
+      ...current,
+      ...settings,
+      entity_overrides: {
+        ...(current.entity_overrides || {}),
+        ...(settings.entity_overrides || {})
+      }
+    };
+    await saveDataAsync(store);
+    return store.seo_settings;
+  },
+
+  async getEntitySEO(entityKey: string): Promise<SEOMetadata | null> {
+    const store = await loadDataAsync();
+    const seo = store.seo_settings?.entity_overrides;
+    return seo?.[entityKey] || null;
+  },
+
+  async setEntitySEO(entityKey: string, metadata: SEOMetadata): Promise<void> {
+    const store = await loadDataAsync();
+    if (!store.seo_settings) store.seo_settings = { ...defaultSEOSettings };
+    if (!store.seo_settings.entity_overrides) store.seo_settings.entity_overrides = {};
+    store.seo_settings.entity_overrides[entityKey] = metadata;
+    await saveDataAsync(store);
+  },
+
+  // --- 4. EXPENSES & ADVANCED ANALYTICS ---
+  async getExpenses(): Promise<ExpenseRecord[]> {
+    const store = await loadDataAsync();
+    return store.expenses || [];
+  },
+
+  async createExpense(data: Partial<ExpenseRecord>): Promise<ExpenseRecord> {
+    const store = await loadDataAsync();
+    const id = `exp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const newExp: ExpenseRecord = {
+      id,
+      title: data.title || 'General Expense',
+      amount: Number(data.amount) || 0,
+      category: (data.category as any) || 'other',
+      date: data.date || new Date().toISOString().split('T')[0],
+      notes: data.notes || '',
+      created_at: new Date().toISOString()
+    };
+    if (!store.expenses) store.expenses = [];
+    store.expenses.unshift(newExp);
+    await saveDataAsync(store);
+    return newExp;
+  },
+
+  async deleteExpense(id: string): Promise<boolean> {
+    const store = await loadDataAsync();
+    if (!store.expenses) return false;
+    const initialLen = store.expenses.length;
+    store.expenses = store.expenses.filter(e => e.id !== id);
+    await saveDataAsync(store);
+    return store.expenses.length < initialLen;
   }
 };
