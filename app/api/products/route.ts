@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
     const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined;
     const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined;
     const sortBy = (searchParams.get('sortBy') as any) || 'newest';
-    const limit = searchParams.get('limit') ? Number(searchParams.get('limit')) : 24;
+    const isAll = searchParams.get('all') === 'true';
+    const limit = isAll ? undefined : (searchParams.get('limit') ? Number(searchParams.get('limit')) : 24);
     const offset = searchParams.get('offset') ? Number(searchParams.get('offset')) : 0;
 
     const result = await db.getProducts({

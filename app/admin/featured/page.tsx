@@ -185,9 +185,26 @@ export default function FeaturedManagementPage() {
 
   // Filter products for the picker modal
   const filteredProductsForPicker = allProducts.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
-      (p.sku && p.sku.toLowerCase().includes(productSearch.toLowerCase()));
-    const matchesCat = selectedCategoryFilter === 'all' || p.category_id === selectedCategoryFilter;
+    const searchLower = productSearch.toLowerCase().trim();
+    const matchesSearch = !searchLower ||
+      p.name.toLowerCase().includes(searchLower) ||
+      (p.sku && p.sku.toLowerCase().includes(searchLower)) ||
+      (p.category?.name && p.category.name.toLowerCase().includes(searchLower));
+
+    if (selectedCategoryFilter === 'all') {
+      return matchesSearch;
+    }
+
+    const childCategoryIds = allCategories
+      .filter(c => c.parent_id === selectedCategoryFilter)
+      .map(c => c.id);
+    const targetCategoryIds = [selectedCategoryFilter, ...childCategoryIds];
+
+    const matchesCat = 
+      targetCategoryIds.includes(p.category_id || '') || 
+      targetCategoryIds.includes(p.category?.id || '') ||
+      targetCategoryIds.includes(p.category?.slug || '');
+
     return matchesSearch && matchesCat;
   });
 
@@ -773,29 +790,43 @@ export default function FeaturedManagementPage() {
               </div>
 
               {/* Search & Filter Bar */}
-              <div className="p-4 border-b border-neutral-800 bg-neutral-950 flex flex-col sm:flex-row gap-2.5">
-                <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={productSearch}
-                    onChange={(e) => setProductSearch(e.target.value)}
-                    placeholder="Search by product name or SKU..."
-                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-hidden focus:border-white"
-                    autoFocus
-                  />
-                </div>
+              <div className="p-4 border-b border-neutral-800 bg-neutral-950 space-y-2">
+                <div className="flex flex-col sm:flex-row gap-2.5">
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={productSearch}
+                      onChange={(e) => setProductSearch(e.target.value)}
+                      placeholder="Search by product name or SKU..."
+                      className="w-full bg-neutral-900 border border-neutral-800 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-hidden focus:border-white"
+                      autoFocus
+                    />
+                  </div>
 
-                <select
-                  value={selectedCategoryFilter}
-                  onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-                  className="bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-neutral-200 focus:outline-hidden focus:border-white"
-                >
-                  <option value="all">All Categories</option>
-                  {allCategories.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                  <select
+                    value={selectedCategoryFilter}
+                    onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                    className="bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-neutral-200 focus:outline-hidden focus:border-white"
+                  >
+                    <option value="all">All Categories ({allProducts.length} items)</option>
+                    {allCategories.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-neutral-400">
+                  <span>Showing <strong className="text-white">{filteredProductsForPicker.length}</strong> of <strong className="text-white">{allProducts.length}</strong> catalog products</span>
+                  {productSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setProductSearch('')}
+                      className="text-neutral-400 hover:text-white transition-colors"
+                    >
+                      Clear search
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Product List */}
@@ -851,6 +882,11 @@ export default function FeaturedManagementPage() {
                               <span className="text-[10px] text-neutral-500">
                                 Stock: {product.stock_quantity}
                               </span>
+                              {product.is_active === false && (
+                                <span className="text-[9px] px-1.5 py-0.2 bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded font-medium">
+                                  Inactive
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>

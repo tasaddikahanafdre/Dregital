@@ -8,7 +8,7 @@ export async function GET() {
     const [featuredProducts, featuredIds, allProductsResult] = await Promise.all([
       db.getFeaturedProducts(),
       db.getFeaturedProductIds(),
-      db.getProducts({ includeInactive: false, limit: 100 })
+      db.getProducts({ includeInactive: true })
     ]);
 
     return NextResponse.json({
