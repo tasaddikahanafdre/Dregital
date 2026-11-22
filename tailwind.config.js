@@ -29,11 +29,19 @@ module.exports = {
       },
       fontFamily: {
         sans: [
+          'Anek Bangla Bengali',
           'Inter',
           '-apple-system',
           'BlinkMacSystemFont',
           '"Segoe UI"',
           'Roboto',
+          'Helvetica',
+          'Arial',
+          'sans-serif',
+          '"Anek Bangla"',
+        ],
+        bangla: [
+          '"Anek Bangla"',
           'sans-serif',
         ],
       },
