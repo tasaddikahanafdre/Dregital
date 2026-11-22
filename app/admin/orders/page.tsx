@@ -41,6 +41,13 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     loadOrders();
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const s = params.get('status');
+      if (s) {
+        setStatusFilter(s);
+      }
+    }
   }, []);
 
   const openOrderModal = (order: Order) => {

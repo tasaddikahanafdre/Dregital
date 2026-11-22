@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
     const [orders, productsResult, categories, expenses] = await Promise.all([
       db.getOrders(),
-      db.getProducts({ includeInactive: true, limit: 200 }),
+      db.getProducts({ includeInactive: true }),
       db.getCategories(true),
       db.getExpenses()
     ]);

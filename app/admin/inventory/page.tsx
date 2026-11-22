@@ -26,6 +26,12 @@ export default function AdminInventoryPage() {
 
   useEffect(() => {
     loadProducts();
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('filter') === 'low' || params.get('filter') === 'out') {
+        setFilterLowStock(true);
+      }
+    }
   }, []);
 
   const adjustStock = async (product: Product, delta: number) => {
