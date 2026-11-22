@@ -143,21 +143,23 @@ export default function Header() {
       )}
 
       {/* 2. Navigation Bar: Full-width black horizontal bar directly below the header */}
-      <nav className="w-full bg-black text-white py-3 px-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-center overflow-x-auto no-scrollbar whitespace-nowrap text-xs sm:text-sm font-normal tracking-wide">
-          {navCategories.map((cat, index) => (
-            <React.Fragment key={cat.name}>
-              <Link
-                href={cat.href}
-                className="px-2.5 sm:px-4 py-0.5 hover:text-neutral-300 transition-colors"
-              >
-                {cat.name}
-              </Link>
-              {index < navCategories.length - 1 && (
-                <span className="text-white/70 select-none">|</span>
-              )}
-            </React.Fragment>
-          ))}
+      <nav className="w-full bg-black text-white py-2.5 px-2 sm:px-4 border-b border-neutral-900">
+        <div className="max-w-7xl mx-auto overflow-x-auto no-scrollbar">
+          <div className="flex items-center min-w-max mx-auto justify-start md:justify-center whitespace-nowrap text-xs sm:text-sm font-normal tracking-wide px-2">
+            {navCategories.map((cat, index) => (
+              <React.Fragment key={cat.name}>
+                <Link
+                  href={cat.href}
+                  className="px-2.5 sm:px-3.5 py-1 hover:text-neutral-300 transition-colors"
+                >
+                  {cat.name}
+                </Link>
+                {index < navCategories.length - 1 && (
+                  <span className="text-white/40 select-none mx-0.5 sm:mx-1">|</span>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       </nav>
     </header>

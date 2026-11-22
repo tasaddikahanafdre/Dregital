@@ -69,3 +69,47 @@ export function formatDate(dateString?: string): string {
     return dateString;
   }
 }
+
+/**
+ * Safely resolves the primary thumbnail/image URL for any product record,
+ * supporting string image_url, ProductImage[] objects with is_primary flags,
+ * string arrays, relative paths, and clean fallback placeholder.
+ */
+export function getProductPrimaryImage(product?: any): string {
+  if (!product) return '/placeholder.svg';
+
+  // 1. Direct product.image_url string
+  if (typeof product.image_url === 'string' && product.image_url.trim()) {
+    const url = product.image_url.trim();
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
+      return url;
+    }
+    return `/${url}`;
+  }
+
+  // 2. Images array
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    // 2a. Check for explicitly marked primary image object
+    const primaryObj = product.images.find((img: any) => img && typeof img === 'object' && img.is_primary);
+    if (primaryObj?.image_url && typeof primaryObj.image_url === 'string' && primaryObj.image_url.trim()) {
+      const url = primaryObj.image_url.trim();
+      return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/') ? url : `/${url}`;
+    }
+
+    // 2b. Check first entry
+    const first = product.images[0];
+    if (typeof first === 'string' && first.trim()) {
+      const url = first.trim();
+      return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/') ? url : `/${url}`;
+    }
+    if (first && typeof first === 'object') {
+      const rawUrl = first.image_url || first.url;
+      if (typeof rawUrl === 'string' && rawUrl.trim()) {
+        const url = rawUrl.trim();
+        return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/') ? url : `/${url}`;
+      }
+    }
+  }
+
+  return '/placeholder.svg';
+}

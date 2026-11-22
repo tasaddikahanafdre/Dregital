@@ -16,7 +16,7 @@ export async function GET(
     }
 
     // Resolve products with live catalog details
-    const allProductsResult = await db.getProducts({ includeInactive: false, limit: 200 });
+    const allProductsResult = await db.getProducts({ includeInactive: true });
     const allProducts = allProductsResult.products;
 
     const resolvedProducts = (deal.products || []).map(dp => {

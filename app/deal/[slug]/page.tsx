@@ -15,7 +15,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useCart } from '@/lib/CartContext';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, getProductPrimaryImage } from '@/lib/utils';
 import { DealPage, Product } from '@/lib/types';
 
 interface ResolvedDealProduct {
@@ -238,9 +238,7 @@ export default function StorefrontDealPage({ params }: { params: Promise<{ slug:
             {products.map((dp) => {
               const product = dp.product;
               const isAdded = addedIds[dp.product_id];
-              const imageUrl = product.image_url || 
-                (product.images && product.images[0]?.image_url) || 
-                '/placeholder.png';
+              const imageUrl = getProductPrimaryImage(product);
 
               return (
                 <div
@@ -248,14 +246,14 @@ export default function StorefrontDealPage({ params }: { params: Promise<{ slug:
                   className="bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-black transition-all flex flex-col justify-between group"
                 >
                   {/* Top Image + Badges */}
-                  <div className="relative aspect-square bg-neutral-100 overflow-hidden">
+                  <div className="relative aspect-square bg-neutral-100 overflow-hidden flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={imageUrl}
                       alt={product.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = '/placeholder.png';
+                        (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
                       }}
                     />
 

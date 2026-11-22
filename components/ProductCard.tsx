@@ -6,7 +6,7 @@ import { ShoppingBag, Heart } from 'lucide-react';
 import { Product } from '@/lib/types';
 import { useCart } from '@/lib/CartContext';
 import { useWishlist } from '@/lib/WishlistContext';
-import { formatPrice, calculateDiscount } from '@/lib/utils';
+import { formatPrice, calculateDiscount, getProductPrimaryImage } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
@@ -20,8 +20,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const inWishlist = isInWishlist(product.id);
   const isOutOfStock = product.stock_quantity <= 0;
 
-  const defaultPlaceholder = 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=600&q=80';
-  const imageUrl = product.image_url || (product.images && product.images[0]?.image_url) || defaultPlaceholder;
+  const imageUrl = getProductPrimaryImage(product);
 
   return (
     <div className="group relative bg-white border border-neutral-200 rounded-lg overflow-hidden flex flex-col justify-between transition-all duration-200 hover:border-neutral-400 hover:shadow-md">

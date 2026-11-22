@@ -27,6 +27,7 @@ import {
   Palette
 } from 'lucide-react';
 import { DealPage, DealProduct, Product } from '@/lib/types';
+import { getProductPrimaryImage } from '@/lib/utils';
 
 export default function AdminDealsPage() {
   const [deals, setDeals] = useState<DealPage[]>([]);
@@ -61,7 +62,7 @@ export default function AdminDealsPage() {
       setLoading(true);
       const [resDeals, resProducts] = await Promise.all([
         fetch('/api/deals?all=true'),
-        fetch('/api/products?limit=150')
+        fetch('/api/products?all=true&includeInactive=true')
       ]);
 
       if (resDeals.ok) {
@@ -374,6 +375,9 @@ export default function AdminDealsPage() {
                         src={deal.banner_url} 
                         alt={deal.title}
                         className="absolute inset-0 w-full h-full object-cover opacity-35" 
+                        onError={(e) => {
+                          (e.currentTarget as HTMLElement).style.display = 'none';
+                        }}
                       />
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-950 to-black opacity-80" />
@@ -671,11 +675,16 @@ export default function AdminDealsPage() {
                                 className="p-2.5 flex items-center justify-between hover:bg-neutral-800/50 transition-colors"
                               >
                                 <div className="flex items-center gap-2.5 min-w-0">
-                                  {p.images?.[0] ? (
-                                    <img src={p.images[0]} alt={p.name} className="w-8 h-8 rounded object-cover shrink-0" />
-                                  ) : (
-                                    <div className="w-8 h-8 rounded bg-neutral-800 shrink-0" />
-                                  )}
+                                  <div className="w-9 h-9 rounded-lg bg-neutral-950 overflow-hidden shrink-0 border border-neutral-800 flex items-center justify-center">
+                                    <img 
+                                      src={getProductPrimaryImage(p)} 
+                                      alt={p.name} 
+                                      className="w-full h-full object-cover" 
+                                      onError={(e) => {
+                                        (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                                      }}
+                                    />
+                                  </div>
                                   <div className="min-w-0">
                                     <p className="text-xs font-medium text-white truncate">{p.name}</p>
                                     <p className="text-[10px] text-neutral-400">Regular: ৳{p.price}</p>
@@ -725,11 +734,16 @@ export default function AdminDealsPage() {
                           >
                             {/* Product Info */}
                             <div className="flex items-center gap-3 min-w-0 md:w-1/3">
-                              {product?.images?.[0] ? (
-                                <img src={product.images[0]} alt={product.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
-                              ) : (
-                                <div className="w-10 h-10 rounded-lg bg-neutral-800 shrink-0" />
-                              )}
+                              <div className="w-10 h-10 rounded-lg bg-neutral-950 overflow-hidden shrink-0 border border-neutral-800 flex items-center justify-center">
+                                <img 
+                                  src={getProductPrimaryImage(product)} 
+                                  alt={product?.name || 'Product'} 
+                                  className="w-full h-full object-cover" 
+                                  onError={(e) => {
+                                    (e.currentTarget as HTMLImageElement).src = '/placeholder.svg';
+                                  }}
+                                />
+                              </div>
                               <div className="min-w-0">
                                 <h4 className="text-xs font-semibold text-white truncate">{product?.name || 'Product'}</h4>
                                 <p className="text-[11px] text-neutral-400">
