@@ -35,12 +35,12 @@ export default function Header() {
         setHasCustomLogo(false);
       });
 
-    // Dynamically load all active categories
-    fetch('/api/categories')
+    // Dynamically load configured featured categories for the header navigation bar
+    fetch('/api/header-categories')
       .then(r => r.json())
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setNavCategories(data.map((c: any) => ({ name: c.name, href: `/category/${c.slug}` })));
+        if (data && Array.isArray(data.header_categories) && data.header_categories.length > 0) {
+          setNavCategories(data.header_categories.map((c: any) => ({ name: c.name, href: `/category/${c.slug}` })));
         }
       })
       .catch(() => {});

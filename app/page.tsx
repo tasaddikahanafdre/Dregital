@@ -13,13 +13,13 @@ export const metadata: Metadata = {
 export const revalidate = 0; // Dynamic data for instant admin updates
 
 export default async function HomePage() {
-  const [categories, productsResult, banners] = await Promise.all([
+  const [categories, featuredProducts, banners] = await Promise.all([
     db.getCategories(false),
-    db.getProducts({ limit: 9 }),
+    db.getFeaturedProducts(),
     db.getBanners(false)
   ]);
 
-  const products = productsResult.products;
+  const products = featuredProducts;
 
   return (
     <div className="w-full bg-white text-black min-h-screen flex flex-col justify-between overflow-x-hidden">

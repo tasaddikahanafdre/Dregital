@@ -16,9 +16,13 @@ interface InitialData {
   pages: PageContent[];
   settings: Record<string, any>;
   contactMessages: ContactMessage[];
+  featured_product_ids?: string[];
+  featured_category_ids?: string[];
 }
 
 const defaultDataset: InitialData = {
+  featured_product_ids: [],
+  featured_category_ids: ['cat-tech-001', 'cat-food-002', 'cat-clothing-003', 'cat-kids-004', 'cat-home-005', 'cat-other-006'],
   categories: [
     {
       id: 'cat-tech-001',
@@ -181,6 +185,12 @@ function loadData(): InitialData {
         pages: Array.isArray(parsed.pages) && parsed.pages.length > 0 ? parsed.pages : defaultDataset.pages,
         settings: { ...defaultDataset.settings, ...(parsed.settings || {}) },
         contactMessages: Array.isArray(parsed.contactMessages) ? parsed.contactMessages : [],
+        featured_product_ids: Array.isArray(parsed.featured_product_ids)
+          ? parsed.featured_product_ids
+          : (Array.isArray(parsed.settings?.featured_product_ids) ? parsed.settings.featured_product_ids : []),
+        featured_category_ids: Array.isArray(parsed.featured_category_ids)
+          ? parsed.featured_category_ids
+          : (Array.isArray(parsed.settings?.featured_category_ids) ? parsed.settings.featured_category_ids : defaultDataset.featured_category_ids),
       };
     } catch (e) {
       console.error('Error reading local data file, falling back to clean dataset', e);
@@ -231,6 +241,12 @@ async function loadDataAsync(): Promise<InitialData> {
           pages: Array.isArray(cloudData.pages) && cloudData.pages.length > 0 ? cloudData.pages : defaultDataset.pages,
           settings: { ...defaultDataset.settings, ...(cloudData.settings || {}) },
           contactMessages: Array.isArray(cloudData.contactMessages) ? cloudData.contactMessages : [],
+          featured_product_ids: Array.isArray(cloudData.featured_product_ids)
+            ? cloudData.featured_product_ids
+            : (Array.isArray(cloudData.settings?.featured_product_ids) ? cloudData.settings.featured_product_ids : []),
+          featured_category_ids: Array.isArray(cloudData.featured_category_ids)
+            ? cloudData.featured_category_ids
+            : (Array.isArray(cloudData.settings?.featured_category_ids) ? cloudData.settings.featured_category_ids : defaultDataset.featured_category_ids),
         };
         lastCloudFetchTime = now;
         return cachedStoreData;
@@ -746,5 +762,126 @@ export const db = {
     }
     await saveDataAsync(store);
     return store.settings;
+  },
+
+  // FEATURED PRODUCTS (3x3 Grid on Homepage - Up to 9 products)
+  async getFeaturedProductIds(): Promise<string[]> {
+    const store = await loadDataAsync();
+    return Array.isArray(store.featured_product_ids) ? store.featured_product_ids.slice(0, 9) : [];
+  },
+
+  async getFeaturedProducts(): Promise<Product[]> {
+    const store = await loadDataAsync();
+    const activeProducts = store.products.filter(p => p.is_active !== false);
+    const featuredIds = (store.featured_product_ids || []).slice(0, 9);
+
+    const orderedFeatured: Product[] = [];
+    const seenIds = new Set<string>();
+
+    // 1. Add explicitly configured featured products in their specified order
+    for (const id of featuredIds) {
+      const found = activeProducts.find(p => p.id === id);
+      if (found && !seenIds.has(found.id)) {
+        orderedFeatured.push(found);
+        seenIds.add(found.id);
+      }
+    }
+
+    // 2. Also check any products marked with is_featured === true that weren't in the list
+    if (orderedFeatured.length < 9) {
+      for (const p of activeProducts) {
+        if (p.is_featured && !seenIds.has(p.id)) {
+          orderedFeatured.push(p);
+          seenIds.add(p.id);
+          if (orderedFeatured.length >= 9) break;
+        }
+      }
+    }
+
+    // 3. If still fewer than 9 (e.g. no products selected yet), fill up to 9 with latest active products so 3x3 grid is complete
+    if (orderedFeatured.length < 9) {
+      for (const p of activeProducts) {
+        if (!seenIds.has(p.id)) {
+          orderedFeatured.push(p);
+          seenIds.add(p.id);
+          if (orderedFeatured.length >= 9) break;
+        }
+      }
+    }
+
+    return orderedFeatured.slice(0, 9);
+  },
+
+  async setFeaturedProducts(productIds: string[]): Promise<Product[]> {
+    const store = await loadDataAsync();
+    // Limit to at most 9 products
+    const cleanIds = Array.from(new Set(productIds.filter(Boolean))).slice(0, 9);
+    store.featured_product_ids = cleanIds;
+    if (!store.settings) store.settings = {};
+    store.settings.featured_product_ids = cleanIds;
+
+    // Sync is_featured flag across all products
+    const idSet = new Set(cleanIds);
+    store.products = store.products.map(p => ({
+      ...p,
+      is_featured: idSet.has(p.id)
+    }));
+
+    await saveDataAsync(store);
+    return this.getFeaturedProducts();
+  },
+
+  // FEATURED CATEGORIES (Header Navigation Bar Categories)
+  // Crucial: Completely independent of homepage category animation (which uses getCategories(false))
+  async getHeaderFeaturedCategoryIds(): Promise<string[]> {
+    const store = await loadDataAsync();
+    return Array.isArray(store.featured_category_ids) && store.featured_category_ids.length > 0
+      ? store.featured_category_ids
+      : defaultDataset.featured_category_ids || [];
+  },
+
+  async getHeaderFeaturedCategories(): Promise<Category[]> {
+    const store = await loadDataAsync();
+    const allActive = store.categories
+      .filter(c => c.is_active !== false)
+      .map(c => ({
+        ...c,
+        image_url: getCategoryIconUrl(c)
+      }));
+
+    const headerIds = store.featured_category_ids || [];
+    if (headerIds.length === 0) {
+      // Default top 6 if not customized
+      const defaultSlugs = ['tech', 'food', 'clothing', 'kids', 'home', 'other'];
+      const defaults = defaultSlugs
+        .map(s => allActive.find(c => c.slug === s || c.id === s))
+        .filter((c): c is Category => Boolean(c));
+      if (defaults.length > 0) return defaults;
+      return allActive.slice(0, 6);
+    }
+
+    // Match configured order
+    const result: Category[] = [];
+    const seen = new Set<string>();
+    for (const idOrSlug of headerIds) {
+      const found = allActive.find(c => c.id === idOrSlug || c.slug === idOrSlug);
+      if (found && !seen.has(found.id)) {
+        result.push(found);
+        seen.add(found.id);
+      }
+    }
+
+    return result.length > 0 ? result : allActive.slice(0, 6);
+  },
+
+  async setHeaderFeaturedCategories(categoryIds: string[]): Promise<Category[]> {
+    const store = await loadDataAsync();
+    const cleanIds = Array.from(new Set(categoryIds.filter(Boolean)));
+    store.featured_category_ids = cleanIds;
+    if (!store.settings) store.settings = {};
+    store.settings.featured_category_ids = cleanIds;
+
+    await saveDataAsync(store);
+    return this.getHeaderFeaturedCategories();
   }
 };

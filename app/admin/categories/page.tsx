@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import AdminLayout from '@/components/AdminLayout';
 import { 
   Plus, 
@@ -190,13 +191,23 @@ export default function AdminCategoriesPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => openAddModal()}
-            className="inline-flex items-center gap-2 bg-white text-black px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-neutral-200 transition-colors shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create Top Category</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/admin/featured?tab=categories"
+              className="inline-flex items-center gap-1.5 bg-neutral-900 border border-neutral-700 text-neutral-200 px-3.5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-neutral-800 transition-colors"
+            >
+              <FolderTree className="w-3.5 h-3.5 text-sky-400" />
+              <span>Manage Header Bar</span>
+            </Link>
+
+            <button
+              onClick={() => openAddModal()}
+              className="inline-flex items-center gap-2 bg-white text-black px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-neutral-200 transition-colors shadow-xs"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create Top Category</span>
+            </button>
+          </div>
         </div>
 
         {/* Tree Display */}
