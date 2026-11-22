@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { db } from '@/lib/db';
 import { getCategoryIconUrl } from '@/lib/categoryIcons';
+import CategoryCardImage from '@/components/CategoryCardImage';
 
 export const revalidate = 0;
 
@@ -12,7 +13,7 @@ export const metadata = {
 };
 
 export default async function CategoriesPage() {
-  const categories = await db.getCategories(false);
+  const categories = (await db.getCategories(false)) || [];
 
   return (
     <div className="w-full bg-white text-black min-h-screen py-6 sm:py-12">
@@ -50,18 +51,9 @@ export default async function CategoriesPage() {
               >
                 {/* 1:1 Aspect Ratio Square Photo Container */}
                 <div className="w-full aspect-square bg-neutral-100 rounded-xl sm:rounded-2xl overflow-hidden relative border border-neutral-200 shadow-xs group-hover:border-black transition-colors">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <CategoryCardImage
                     src={getCategoryIconUrl(category)}
                     alt={category.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      if (!target.dataset.fallback) {
-                        target.dataset.fallback = 'true';
-                        target.src = '/icons/categories/other.svg';
-                      }
-                    }}
                   />
                 </div>
 
