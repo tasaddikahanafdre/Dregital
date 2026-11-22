@@ -10,32 +10,31 @@ import {
   AlertTriangle, 
   ExternalLink, 
   FileText, 
-  Share2, 
   Sparkles, 
   Save, 
   Eye, 
   Layers, 
-  Tag, 
   Package, 
   FolderTree, 
-  HelpCircle,
-  ShieldCheck,
-  Check
+  ShieldCheck
 } from 'lucide-react';
 import { GlobalSEOSettings, SEOMetadata, Product, Category } from '@/lib/types';
 
+const defaultState: GlobalSEOSettings = {
+  site_title_default: 'Dregital | Premium Tech, Lifestyle & Gadgets Store Bangladesh',
+  site_title_template: '%s | Dregital Bangladesh',
+  meta_description: 'Shop top gadgets, smart lights, tech accessories, lifestyle products and electronics at the best prices with fast home delivery in Bangladesh.',
+  og_image: '/banner/banner.png',
+  canonical_base_url: 'https://dregital.shop',
+  keywords: 'online shop bangladesh, gadgets bd, electronics, smart home, dregital',
+  google_site_verification: '',
+  robots_indexing: true,
+  entity_overrides: {}
+};
+
 export default function AdminSEOPage() {
   const [activeTab, setActiveTab] = useState<'global' | 'products' | 'categories' | 'pages' | 'audit'>('global');
-  const [settings, setSettings] = useState<GlobalSEOSettings>({
-    site_title: 'Dregital | Premium Tech, Lifestyle & Gadgets Store Bangladesh',
-    title_suffix: ' | Dregital Bangladesh',
-    default_meta_description: 'Shop top gadgets, smart lights, tech accessories, lifestyle products and electronics at the best prices with fast home delivery in Bangladesh.',
-    default_og_image: '',
-    site_url: 'https://dregital.shop',
-    keywords: ['online shop bangladesh', 'gadgets bd', 'electronics', 'smart home', 'dregital'],
-    google_site_verification: '',
-    entities: {}
-  });
+  const [settings, setSettings] = useState<GlobalSEOSettings>(defaultState);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -43,7 +42,7 @@ export default function AdminSEOPage() {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Selected entity for drawer/editor in Products/Categories/Pages tab
+  // Selected entity for editor in Products/Categories/Pages tab
   const [selectedEntityKey, setSelectedEntityKey] = useState<string>('');
   const [currentSEO, setCurrentSEO] = useState<SEOMetadata>({});
   const [entitySearch, setEntitySearch] = useState('');
@@ -63,13 +62,24 @@ export default function AdminSEOPage() {
       const res = await fetch('/api/seo');
       if (res.ok) {
         const data = await res.json();
-        if (data.settings) {
-          setSettings(data.settings);
+        if (data.settings && typeof data.settings === 'object') {
+          const s = data.settings;
+          setSettings({
+            site_title_default: s.site_title_default || s.site_title || defaultState.site_title_default,
+            site_title_template: s.site_title_template || s.title_suffix || defaultState.site_title_template,
+            meta_description: s.meta_description || s.default_meta_description || defaultState.meta_description,
+            og_image: s.og_image || defaultState.og_image,
+            canonical_base_url: s.canonical_base_url || s.site_url || defaultState.canonical_base_url,
+            keywords: typeof s.keywords === 'string' ? s.keywords : Array.isArray(s.keywords) ? s.keywords.join(', ') : defaultState.keywords,
+            google_site_verification: s.google_site_verification || '',
+            robots_indexing: s.robots_indexing ?? true,
+            entity_overrides: s.entity_overrides || s.entities || {}
+          });
         }
-        if (data.products) {
+        if (Array.isArray(data.products)) {
           setProducts(data.products);
         }
-        if (data.categories) {
+        if (Array.isArray(data.categories)) {
           setCategories(data.categories);
         }
       }
@@ -106,7 +116,7 @@ export default function AdminSEOPage() {
 
   const handleSelectEntity = (key: string) => {
     setSelectedEntityKey(key);
-    const existing = settings.entities?.[key] || {};
+    const existing = (settings.entity_overrides || {})[key] || {};
     setCurrentSEO(existing);
   };
 
@@ -123,11 +133,10 @@ export default function AdminSEOPage() {
         })
       });
       if (res.ok) {
-        // update local state
         setSettings(prev => ({
           ...prev,
-          entities: {
-            ...prev.entities,
+          entity_overrides: {
+            ...(prev.entity_overrides || {}),
             [selectedEntityKey]: currentSEO
           }
         }));
@@ -142,33 +151,43 @@ export default function AdminSEOPage() {
   };
 
   // Preview computations
+  const defaultSiteTitle = settings.site_title_default || 'Dregital';
+  const titleSuffix = settings.site_title_template 
+    ? ` | ${settings.site_title_template.replace('%s', '').replace(/^[| -]+/, '').trim()}`
+    : ' | Dregital';
+  const defaultDesc = settings.meta_description || '';
+  const baseUrl = settings.canonical_base_url || 'https://dregital.shop';
+
   const previewTitle = currentSEO.meta_title || (
     selectedEntityKey.startsWith('product:')
-      ? (products.find(p => `product:${p.id}` === selectedEntityKey)?.name || 'Product') + (settings.title_suffix || '')
+      ? (products.find(p => `product:${p.id}` === selectedEntityKey)?.name || 'Product') + titleSuffix
       : selectedEntityKey.startsWith('category:')
-      ? (categories.find(c => `category:${c.id}` === selectedEntityKey)?.name || 'Category') + (settings.title_suffix || '')
-      : settings.site_title
+      ? (categories.find(c => `category:${c.id}` === selectedEntityKey)?.name || 'Category') + titleSuffix
+      : defaultSiteTitle
   );
 
-  const previewDescription = currentSEO.meta_description || settings.default_meta_description;
+  const previewDescription = currentSEO.meta_description || defaultDesc;
 
-  let previewUrl = settings.site_url;
+  let previewUrl = baseUrl;
   if (selectedEntityKey.startsWith('product:')) {
     const prod = products.find(p => `product:${p.id}` === selectedEntityKey);
-    previewUrl = `${settings.site_url}/product/${prod?.slug || 'sample'}`;
+    previewUrl = `${baseUrl}/product/${prod?.slug || 'sample'}`;
   } else if (selectedEntityKey.startsWith('category:')) {
     const cat = categories.find(c => `category:${c.id}` === selectedEntityKey);
-    previewUrl = `${settings.site_url}/category/${cat?.slug || 'sample'}`;
+    previewUrl = `${baseUrl}/category/${cat?.slug || 'sample'}`;
   } else if (selectedEntityKey.startsWith('page:')) {
     const p = staticPages.find(sp => sp.key === selectedEntityKey);
-    previewUrl = `${settings.site_url}${p?.path || ''}`;
+    previewUrl = `${baseUrl}${p?.path || ''}`;
   }
 
   // SEO Health checks
-  const hasValidGlobalTitle = settings.site_title.length >= 30 && settings.site_title.length <= 70;
-  const hasValidGlobalDesc = settings.default_meta_description.length >= 100 && settings.default_meta_description.length <= 170;
-  const productsWithCustomSEO = Object.keys(settings.entities || {}).filter(k => k.startsWith('product:')).length;
-  const categoriesWithCustomSEO = Object.keys(settings.entities || {}).filter(k => k.startsWith('category:')).length;
+  const siteTitleLen = (settings.site_title_default || '').length;
+  const metaDescLen = (settings.meta_description || '').length;
+  const hasValidGlobalTitle = siteTitleLen >= 30 && siteTitleLen <= 70;
+  const hasValidGlobalDesc = metaDescLen >= 100 && metaDescLen <= 170;
+  const overrides = settings.entity_overrides || {};
+  const productsWithCustomSEO = Object.keys(overrides).filter(k => k.startsWith('product:')).length;
+  const categoriesWithCustomSEO = Object.keys(overrides).filter(k => k.startsWith('category:')).length;
 
   return (
     <AdminLayout>
@@ -284,13 +303,13 @@ export default function AdminSEOPage() {
 
               <div>
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
-                  Default Site Title <span className="text-neutral-500">({settings.site_title.length}/60 chars)</span>
+                  Default Site Title <span className="text-neutral-500">({siteTitleLen}/60 chars)</span>
                 </label>
                 <input
                   type="text"
                   required
-                  value={settings.site_title}
-                  onChange={(e) => setSettings({ ...settings, site_title: e.target.value })}
+                  value={settings.site_title_default || ''}
+                  onChange={(e) => setSettings({ ...settings, site_title_default: e.target.value })}
                   className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-600"
                 />
               </div>
@@ -298,13 +317,13 @@ export default function AdminSEOPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-neutral-300 mb-1">
-                    Title Brand Suffix (Appended to pages & products)
+                    Title Template / Brand Suffix
                   </label>
                   <input
                     type="text"
-                    value={settings.title_suffix || ''}
-                    placeholder=" | Dregital Bangladesh"
-                    onChange={(e) => setSettings({ ...settings, title_suffix: e.target.value })}
+                    value={settings.site_title_template || ''}
+                    placeholder="%s | Dregital Bangladesh"
+                    onChange={(e) => setSettings({ ...settings, site_title_template: e.target.value })}
                     className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-600"
                   />
                 </div>
@@ -314,8 +333,8 @@ export default function AdminSEOPage() {
                   </label>
                   <input
                     type="url"
-                    value={settings.site_url}
-                    onChange={(e) => setSettings({ ...settings, site_url: e.target.value })}
+                    value={settings.canonical_base_url || ''}
+                    onChange={(e) => setSettings({ ...settings, canonical_base_url: e.target.value })}
                     className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-600 font-mono"
                   />
                 </div>
@@ -323,28 +342,42 @@ export default function AdminSEOPage() {
 
               <div>
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
-                  Default Meta Description <span className="text-neutral-500">({settings.default_meta_description.length}/160 chars)</span>
+                  Default Meta Description <span className="text-neutral-500">({metaDescLen}/160 chars)</span>
                 </label>
                 <textarea
                   rows={3}
                   required
-                  value={settings.default_meta_description}
-                  onChange={(e) => setSettings({ ...settings, default_meta_description: e.target.value })}
+                  value={settings.meta_description || ''}
+                  onChange={(e) => setSettings({ ...settings, meta_description: e.target.value })}
                   className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-neutral-600"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
-                  Google Search Console Verification Token (Meta tag content)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. google-site-verification=XXXXXXXXXXXXXXXXXXXX"
-                  value={settings.google_site_verification || ''}
-                  onChange={(e) => setSettings({ ...settings, google_site_verification: e.target.value })}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-neutral-600"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-neutral-300 mb-1">
+                    Global Keywords
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.keywords || ''}
+                    placeholder="gadgets, electronics, online shop bangladesh"
+                    onChange={(e) => setSettings({ ...settings, keywords: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neutral-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-neutral-300 mb-1">
+                    Google Search Console Verification Token
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. google-site-verification=XXXXXXXXXXXXXXXXXXXX"
+                    value={settings.google_site_verification || ''}
+                    onChange={(e) => setSettings({ ...settings, google_site_verification: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-neutral-600"
+                  />
+                </div>
               </div>
 
               <div className="pt-2">
@@ -371,10 +404,10 @@ export default function AdminSEOPage() {
                   <span className="text-neutral-500">›</span>
                 </div>
                 <div className="text-[#8ab4f8] text-base hover:underline cursor-pointer font-medium leading-snug line-clamp-1 mb-1">
-                  {settings.site_title}
+                  {settings.site_title_default}
                 </div>
                 <div className="text-[#bdc1c6] text-xs leading-relaxed line-clamp-2">
-                  {settings.default_meta_description}
+                  {settings.meta_description}
                 </div>
               </div>
             </div>
@@ -403,7 +436,7 @@ export default function AdminSEOPage() {
                     .filter(p => p.name.toLowerCase().includes(entitySearch.toLowerCase()))
                     .map(p => {
                       const key = `product:${p.id}`;
-                      const hasCustom = !!settings.entities?.[key];
+                      const hasCustom = !!(settings.entity_overrides || {})[key];
                       const isSelected = selectedEntityKey === key;
                       return (
                         <div
@@ -425,7 +458,7 @@ export default function AdminSEOPage() {
                             </div>
                           </div>
                           {hasCustom ? (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 shrink-0 ml-2">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 shrink-0 ml-2 font-medium">
                               Custom SEO
                             </span>
                           ) : (
@@ -443,7 +476,7 @@ export default function AdminSEOPage() {
                     .filter(c => c.name.toLowerCase().includes(entitySearch.toLowerCase()))
                     .map(c => {
                       const key = `category:${c.id}`;
-                      const hasCustom = !!settings.entities?.[key];
+                      const hasCustom = !!(settings.entity_overrides || {})[key];
                       const isSelected = selectedEntityKey === key;
                       return (
                         <div
@@ -458,7 +491,7 @@ export default function AdminSEOPage() {
                             <p className="text-[10px] text-neutral-500 font-mono truncate">/category/{c.slug}</p>
                           </div>
                           {hasCustom ? (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 shrink-0 ml-2">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 shrink-0 ml-2 font-medium">
                               Custom SEO
                             </span>
                           ) : (
@@ -473,7 +506,7 @@ export default function AdminSEOPage() {
 
                 {activeTab === 'pages' && (
                   staticPages.map(page => {
-                    const hasCustom = !!settings.entities?.[page.key];
+                    const hasCustom = !!(settings.entity_overrides || {})[page.key];
                     const isSelected = selectedEntityKey === page.key;
                     return (
                       <div
@@ -488,7 +521,7 @@ export default function AdminSEOPage() {
                           <p className="text-[10px] text-neutral-500 font-mono truncate">{page.path}</p>
                         </div>
                         {hasCustom ? (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 shrink-0 ml-2">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 shrink-0 ml-2 font-medium">
                             Custom SEO
                           </span>
                         ) : (
@@ -658,7 +691,7 @@ export default function AdminSEOPage() {
                   <Sparkles className="w-4 h-4 text-amber-400" />
                 </div>
                 <div className="text-xl font-bold text-white mt-2">
-                  {Object.keys(settings.entities || {}).length} Entities
+                  {Object.keys(settings.entity_overrides || {}).length} Entities
                 </div>
                 <p className="text-[11px] text-neutral-500 mt-1">
                   {productsWithCustomSEO} products & {categoriesWithCustomSEO} categories customized.
@@ -679,7 +712,7 @@ export default function AdminSEOPage() {
                   <div>
                     <h4 className="text-xs font-semibold text-white">Site Title Optimization</h4>
                     <p className="text-[11px] text-neutral-400 mt-0.5">
-                      Your global title is {settings.site_title.length} characters long. Search engines recommend between 30 and 60 characters for maximum CTR.
+                      Your global title is {siteTitleLen} characters long. Search engines recommend between 30 and 60 characters for maximum CTR.
                     </p>
                   </div>
                 </div>
@@ -693,7 +726,7 @@ export default function AdminSEOPage() {
                   <div>
                     <h4 className="text-xs font-semibold text-white">Meta Description Quality</h4>
                     <p className="text-[11px] text-neutral-400 mt-0.5">
-                      Your default description is {settings.default_meta_description.length} characters long. Between 120 and 160 characters prevents truncation on mobile displays.
+                      Your default description is {metaDescLen} characters long. Between 120 and 160 characters prevents truncation on mobile displays.
                     </p>
                   </div>
                 </div>

@@ -256,6 +256,7 @@ export interface SEOMetadata {
   og_description?: string;
   og_image?: string;
   image_alt?: string;
+  no_index?: boolean;
 }
 
 export interface GlobalSEOSettings {
@@ -266,6 +267,7 @@ export interface GlobalSEOSettings {
   canonical_base_url: string; // https://dregital.shop
   og_image: string;
   robots_indexing: boolean;
+  google_site_verification?: string;
   custom_header_tags?: string;
   entity_overrides?: Record<string, SEOMetadata>; // key: 'prod:xyz', 'cat:xyz', 'page:slug'
 }
